@@ -9,7 +9,7 @@ const PaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   // @ts-ignore
-  const { network, contact, amount } = route.params || {};
+  const { network, contact, amount, bundle, price } = route.params || {};
 
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,11 +28,47 @@ const PaymentScreen: React.FC = () => {
         setLoading(false);
         // Simulate transaction result
         const isSuccess = pin !== '0000'; // Example: 0000 fails
+        const now = new Date();
+        let transactionObj;
+        if (bundle && price) {
+          transactionObj = {
+            type: 'Data',
+            network,
+            contact,
+            bundle,
+            price,
+            amount: price,
+            date: now.toISOString().slice(0, 10),
+            time: now.toTimeString().slice(0, 5),
+            sender: 'Obed Ihekaike', // Replace with actual user if available
+            receiver: contact,
+            phone: contact,
+            sessionId: 'DATA' + now.getTime(),
+            bankName: network,
+            status: isSuccess ? 'success' : 'error',
+          };
+        } else {
+          transactionObj = {
+            type: 'Airtime',
+            network,
+            contact,
+            amount,
+            date: now.toISOString().slice(0, 10),
+            time: now.toTimeString().slice(0, 5),
+            sender: 'Obed Ihekaike',
+            receiver: contact,
+            phone: contact,
+            sessionId: 'AIRTIME' + now.getTime(),
+            bankName: network,
+            status: isSuccess ? 'success' : 'error',
+          };
+        }
         (navigation as any).replace('TransactionResult', {
           status: isSuccess ? 'success' : 'error',
           message: isSuccess
-            ? `Airtime sent to ${contact}`
+            ? `${transactionObj.type} sent to ${contact}`
             : 'Insufficient balance or invalid PIN.',
+          transaction: transactionObj,
         });
       }, 5000);
     }

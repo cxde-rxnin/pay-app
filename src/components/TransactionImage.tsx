@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 
+// Extend Transaction type to include all possible fields
 export interface Transaction {
   amount: string;
   date: string;
@@ -18,11 +19,10 @@ export interface Transaction {
   sessionId: string;
   bankName?: string;
   status?: string;
-}
-
-export interface TransactionImageProps {
-  transaction: Transaction;
-  backgroundImage?: any;
+  bundle?: string; // Added for data transaction
+  price?: string; // Added for data transaction
+  contact?: string; // Added for data transaction
+  network?: string; // Added for data transaction
 }
 
 // Helper: Dummy transaction data for different types
@@ -68,6 +68,7 @@ const getDummyTransaction = (type: string): Transaction => {
         sessionId: 'DATA123456789',
         bankName: 'Glo',
         status: 'success',
+        bundle: '1.5GB', // Dummy bundle data
       };
     default:
       return {
@@ -87,10 +88,7 @@ const getDummyTransaction = (type: string): Transaction => {
 // Use dummy data directly for preview/testing
 const dummyTransaction = getDummyTransaction('Airtime'); // Change type as needed
 
-const TransactionImage: React.FC<{ backgroundImage?: any }> = ({ backgroundImage }) => {
-  const transaction = dummyTransaction;
-  const viewRef = useRef<View>(null);
-
+const TransactionImage: React.FC<{ backgroundImage?: any; transaction: Transaction }> = ({ backgroundImage, transaction }) => {
   if (!transaction) {
     return (
       <View style={styles.card} collapsable={false}>
@@ -98,17 +96,40 @@ const TransactionImage: React.FC<{ backgroundImage?: any }> = ({ backgroundImage
       </View>
     );
   }
+  // Helper to build transaction object for Data
+  const buildDataTransaction = () => {
+    const now = new Date();
+    return {
+      amount: transaction?.price || '',
+      date: now.toISOString().slice(0, 10),
+      time: now.toTimeString().slice(0, 5),
+      type: 'Data',
+      sender: 'Obed Ihekaike', // Replace with actual user if available
+      receiver: transaction?.contact || '',
+      phone: transaction?.contact || '',
+      sessionId: 'DATA' + now.getTime(),
+      bankName: transaction?.network || '',
+      status: 'success',
+      bundle: transaction?.bundle || '',
+    };
+  };
+  // In TransactionImage, use buildDataTransaction if transaction.type === 'Data' and transaction is missing fields
+  const tx: Transaction = transaction?.type === 'Data' ? buildDataTransaction() as Transaction : transaction;
+  const viewRef = useRef<View>(null);
 
   const getStatusIcon = () => {
-    if (transaction.status === 'success') {
+    if (tx.status && tx.status.toLowerCase() === 'success') {
       return <Ionicons name="checkmark-circle" size={28} color="#00D4AA" />;
     }
-    return <Ionicons name="time-outline" size={28} color="#FFA726" />;
+    if (tx.status && tx.status.toLowerCase() === 'pending') {
+      return <Ionicons name="time-outline" size={28} color="#FFA726" />;
+    }
+    return <Ionicons name="close-circle" size={28} color="#e74c3c" />;
   };
 
   const getTransactionIcon = () => {
-    if (!transaction.type) return null;
-    switch (transaction.type.toLowerCase()) {
+    if (!tx.type) return null;
+    switch (tx.type.toLowerCase()) {
       case 'airtime':
         return <Ionicons name="call" size={24} color="#4A90E2" />;
       case 'data':
@@ -149,10 +170,10 @@ const TransactionImage: React.FC<{ backgroundImage?: any }> = ({ backgroundImage
         {/* Amount Section */}
         <View style={styles.amountSection}>
           <Text style={styles.amountLabel}>Amount</Text>
-          <Text style={styles.amount}>{transaction.amount}</Text>
+          <Text style={styles.amount}>{tx.amount}</Text>
           <View style={styles.transactionTypeRow}>
             {getTransactionIcon()}
-            <Text style={styles.transactionType}>{transaction.type}</Text>
+            <Text style={styles.transactionType}>{tx.type}</Text>
           </View>
         </View>
 
@@ -161,29 +182,43 @@ const TransactionImage: React.FC<{ backgroundImage?: any }> = ({ backgroundImage
           <View>
             <View style={styles.userInfo}>
               <View style={styles.userDetails}>
-                <Text style={styles.userName}>{transaction.sender}</Text>
-                {transaction.senderBank && (
+                <Text style={styles.userName}>{tx.sender}</Text>
+                {tx.senderBank && (
                   <Text style={styles.userBank}>
-                    {transaction.senderBank}
-                    {transaction.senderAccount && ` • ${transaction.senderAccount}`}
+                    {tx.senderBank}
+                    {tx.senderAccount && ` • ${tx.senderAccount}`}
                   </Text>
                 )}
               </View>
             </View>
-            
-            {transaction.receiver && (
-              <>
-                <View style={styles.receiverInfo}>
-                  <Text style={styles.receiverLabel}>To:</Text>
-                  <Text style={styles.receiverName}>{transaction.receiver}</Text>
-                  {transaction.receiverAccount && (
-                    <Text style={styles.receiverAccount}>{transaction.receiverAccount}</Text>
-                  )}
-                  {transaction.phone && (
-                    <Text style={styles.receiverPhone}>{transaction.phone}</Text>
-                  )}
-                </View>
-              </>
+            {/* Data transaction details */}
+            {tx.type && tx.type.toLowerCase() === 'data' && (
+              <View style={styles.receiverInfo}>
+                <Text style={styles.receiverLabel}>Recipient:</Text>
+                <Text style={styles.receiverName}>{tx.receiver || tx.phone || 'N/A'}</Text>
+                {tx.phone && (
+                  <Text style={styles.receiverPhone}>{tx.phone}</Text>
+                )}
+                {tx.bundle && (
+                  <Text style={styles.receiverAccount}>Bundle: {tx.bundle}</Text>
+                )}
+                {tx.bankName && (
+                  <Text style={styles.receiverAccount}>Network: {tx.bankName}</Text>
+                )}
+              </View>
+            )}
+            {/* Other transaction types */}
+            {tx.type && tx.type.toLowerCase() !== 'data' && tx.receiver && (
+              <View style={styles.receiverInfo}>
+                <Text style={styles.receiverLabel}>To:</Text>
+                <Text style={styles.receiverName}>{tx.receiver}</Text>
+                {tx.receiverAccount && (
+                  <Text style={styles.receiverAccount}>{tx.receiverAccount}</Text>
+                )}
+                {tx.phone && (
+                  <Text style={styles.receiverPhone}>{tx.phone}</Text>
+                )}
+              </View>
             )}
           </View>
         </View>
@@ -194,12 +229,12 @@ const TransactionImage: React.FC<{ backgroundImage?: any }> = ({ backgroundImage
           <View style={styles.detailsGrid}>
             <View>
               <Text style={styles.detailLabel}>Date & Time</Text>
-              <Text style={styles.detailValue}>{transaction.date}</Text>
-              <Text style={styles.detailSubValue}>{transaction.time}</Text>
+              <Text style={styles.detailValue}>{tx.date || 'N/A'}</Text>
+              <Text style={styles.detailSubValue}>{tx.time || 'N/A'}</Text>
             </View>
             <View style={{ marginTop: 18 }}>
               <Text style={styles.detailLabel}>Session ID</Text>
-              <Text style={styles.detailValue}>{transaction.sessionId ? String(transaction.sessionId).substring(0, 8) + '...' : 'N/A'}</Text>
+              <Text style={styles.detailValue}>{tx.sessionId ? String(tx.sessionId).substring(0, 8) + '...' : 'N/A'}</Text>
             </View>
           </View>
         </View>
@@ -209,7 +244,7 @@ const TransactionImage: React.FC<{ backgroundImage?: any }> = ({ backgroundImage
           <View style={styles.footerDivider} />
           <View style={styles.footerContent}>
             <Text style={styles.footerText}>Secure transaction powered by</Text>
-            <Text style={styles.footerBrand}>Payyy {transaction.bankName && `• ${transaction.bankName}`}</Text>
+            <Text style={styles.footerBrand}>Payyy {tx.bankName && `• ${tx.bankName}`}</Text>
           </View>
           <View style={styles.securityBadge}>
             <Ionicons name="shield-checkmark" size={14} color="#00D4AA" />
@@ -227,7 +262,6 @@ const styles = StyleSheet.create({
     height: 900,
     position: 'relative',
     backgroundColor: '#f8fafc',
-    borderRadius: 24,
     overflow: 'hidden',
     alignSelf: 'center',
     shadowColor: '#000',
@@ -255,7 +289,7 @@ const styles = StyleSheet.create({
   },
   receiptCard: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: '#ffffff',
     margin: 20,
     borderRadius: 20,
     padding: 32,

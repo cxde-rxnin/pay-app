@@ -10,6 +10,7 @@ import { Notification } from 'iconsax-react-nativejs';
 import AddMoneyModal from '../modals/AddMoneyModal';
 import SendMoneyModal from '../modals/SendMoneyModal';
 import AirtimeModal from '../modals/AirtimeModal';
+import DataModal from '../modals/DataModal';
 
 type AppTabParamList = {
   Home: undefined;
@@ -26,6 +27,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [showAddMoney, setShowAddMoney] = useState(false);
   const [showSendMoney, setShowSendMoney] = useState(false);
   const [showAirtimeModal, setShowAirtimeModal] = useState(false);
+  const [showDataModal, setShowDataModal] = useState(false);
   const user = { name: 'Obed', accountNumber: '1234567890', bankName: 'Lemo Bank' };
 
   return (
@@ -41,6 +43,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
           // TODO: Navigate to next form step or handle data
         }}
       />
+      <DataModal visible={showDataModal} onClose={() => setShowDataModal(false)} />
       <View style={{ paddingHorizontal: 20, paddingTop: 32 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, paddingTop: 40 }}>
           <Text style={{ fontSize: 24, color: colors.text, fontWeight: '900' }}>Hello, Obed</Text>
@@ -79,15 +82,15 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
                 />
               </View>
             </TouchableOpacity>
-            
-            <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
-              <Image
-                source={require('../../assets/wifi.png')}
-                style={{ width: 48, height: 48, borderRadius: 8 }}
-                resizeMode="cover"
-              />
-            </View>
-
+            <TouchableOpacity onPress={() => setShowDataModal(true)}>
+              <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
+                <Image
+                  source={require('../../assets/wifi.png')}
+                  style={{ width: 48, height: 48, borderRadius: 8 }}
+                  resizeMode="cover"
+                />
+              </View>
+            </TouchableOpacity>
             <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
               <Image
                 source={require('../../assets/history.png')}
@@ -95,7 +98,6 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
                 resizeMode="cover"
               />
             </View>
-
             <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
               <Image
                 source={require('../../assets/tag.png')}

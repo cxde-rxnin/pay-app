@@ -51,7 +51,10 @@ const TransactionResultScreen: React.FC = () => {
       {/* Hidden TransactionImage for sharing - positioned off-screen */}
       <View style={styles.hiddenImageContainer}>
         <View ref={transactionImageRef} collapsable={false}>
-          <TransactionImage backgroundImage={require('../../assets/receipt.png')} />
+          <TransactionImage
+            backgroundImage={require('../../assets/receipt.png')}
+            transaction={transactionInfo}
+          />
         </View>
       </View>
       <View style={styles.buttonContainer}>

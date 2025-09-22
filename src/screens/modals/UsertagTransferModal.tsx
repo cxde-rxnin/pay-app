@@ -121,71 +121,76 @@ const UsertagTransferModal: React.FC<UsertagTransferModalProps> = ({ visible, on
       <TouchableWithoutFeedback onPress={handleClose}>
         <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}/>
       </TouchableWithoutFeedback>
-      <PanGestureHandler
-        onGestureEvent={onGestureEvent}
-        onHandlerStateChange={onHandlerStateChange}
-        activeOffsetY={10}
-        failOffsetY={-10}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
       >
-        <Animated.View style={[styles.card, {
-          transform: [
-            { translateY: slideAnim },
-            { translateY: translateY }
-          ],
-          bottom: keyboardHeight > 0 ? keyboardHeight + 20 : 30,
-        }]}
+        <PanGestureHandler
+          onGestureEvent={onGestureEvent}
+          onHandlerStateChange={onHandlerStateChange}
+          activeOffsetY={10}
+          failOffsetY={-10}
         >
-          <View style={styles.dragIndicator} />
-          <Text style={styles.title}>Send Money by Usertag</Text>
-          
-          <TouchableWithoutFeedback onPress={() => usertagInputRef.current?.focus()}>
-            <View style={[
-              styles.inputContainer, 
-              usertagFocused && styles.inputContainerFocused
-            ]}>
-              <Text style={styles.prefix}>@</Text>
-              <TextInput
-                ref={usertagInputRef}
-                style={styles.usertagInput}
-                placeholder="usertag"
-                placeholderTextColor={colors.gray}
-                value={usertag.replace(/^@/, '')}
-                onChangeText={text => setUsertag(text.replace(/^@/, ''))}
-                onFocus={() => setUsertagFocused(true)}
-                onBlur={() => setUsertagFocused(false)}
-                autoCapitalize="none"
-                autoCorrect={false}
+          <Animated.View style={[styles.card, {
+            transform: [
+              { translateY: slideAnim },
+              { translateY: translateY }
+            ],
+            bottom: keyboardHeight > 0 ? keyboardHeight + 20 : 30,
+          }]}
+          >
+            <View style={styles.dragIndicator} />
+            <Text style={styles.title}>Send Money by Usertag</Text>
+            
+            <TouchableWithoutFeedback onPress={() => usertagInputRef.current?.focus()}>
+              <View style={[
+                styles.inputContainer, 
+                usertagFocused && styles.inputContainerFocused
+              ]}>
+                <Text style={styles.prefix}>@</Text>
+                <TextInput
+                  ref={usertagInputRef}
+                  style={styles.usertagInput}
+                  placeholder="usertag"
+                  placeholderTextColor={colors.gray}
+                  value={usertag.replace(/^@/, '')}
+                  onChangeText={text => setUsertag(text.replace(/^@/, ''))}
+                  onFocus={() => setUsertagFocused(true)}
+                  onBlur={() => setUsertagFocused(false)}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+
+
+            <TextInput
+              style={styles.input}
+              placeholder="Amount"
+              placeholderTextColor={colors.gray}
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="numeric"
+            />
+            
+            <View style={{ flexDirection: 'row', marginTop: 24 }}>
+              <Button
+                title="Send"
+                onPress={() => {
+                  handleClose();
+                  (navigation as any).navigate('Loading', {
+                    type: 'internal',
+                    usertag: usertag.startsWith('@') ? usertag : '@' + usertag,
+                    amount,
+                  });
+                }}
+                style={{ flex: 1, marginLeft: 8, opacity: !usertag || !amount ? 0.5 : 1 }}
+                disabled={!usertag || !amount}
               />
             </View>
-          </TouchableWithoutFeedback>
-
-
-          <TextInput
-            style={styles.input}
-            placeholder="Amount"
-            placeholderTextColor={colors.gray}
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="numeric"
-          />
-          
-          <View style={{ flexDirection: 'row', marginTop: 24 }}>
-            <Button
-              title="Send"
-              onPress={() => {
-                handleClose();
-                (navigation as any).navigate('Loading', {
-                  type: 'internal',
-                  usertag: usertag.startsWith('@') ? usertag : '@' + usertag,
-                  amount,
-                });
-              }}
-              style={{ flex: 1, marginLeft: 8, opacity: !usertag || !amount ? 0.5 : 1 }}
-              disabled={!usertag || !amount}
-            />
-          </View>
-        </Animated.View>
-      </PanGestureHandler>
+          </Animated.View>
+        </PanGestureHandler>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

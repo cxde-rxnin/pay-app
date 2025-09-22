@@ -23,70 +23,10 @@ export interface Transaction {
   price?: string; // Added for data transaction
   contact?: string; // Added for data transaction
   network?: string; // Added for data transaction
+  usertag?: string; // Added for internal transfers
+  accountNumber?: string; // Added for internal transfers
+  accountName?: string; // Added for internal transfers
 }
-
-// Helper: Dummy transaction data for different types
-const getDummyTransaction = (type: string): Transaction => {
-  switch (type) {
-    case 'Airtime':
-      return {
-        amount: '₦500.00',
-        date: '2025-09-21',
-        time: '14:32',
-        type: 'Airtime',
-        sender: 'Obed Ihekaike',
-        receiver: '08012345678',
-        phone: '08012345678',
-        sessionId: 'AIRTIME123456789',
-        bankName: 'MTN',
-        status: 'success',
-      };
-    case 'Bank Transfer':
-      return {
-        amount: '₦10,000.00',
-        date: '2025-09-21',
-        time: '09:15',
-        type: 'Bank Transfer',
-        sender: 'Obed Ihekaike',
-        senderBank: 'Opay',
-        senderAccount: '8124731527',
-        receiver: 'OBED OKEMSINACHI IHEKAIKE',
-        receiverAccount: 'GTBank (0123456789)',
-        sessionId: 'BANKTX123456789',
-        bankName: 'GTBank',
-        status: 'success',
-      };
-    case 'Data':
-      return {
-        amount: '₦1,200.00',
-        date: '2025-09-21',
-        time: '16:45',
-        type: 'Data',
-        sender: 'Obed Ihekaike',
-        receiver: '08098765432',
-        phone: '08098765432',
-        sessionId: 'DATA123456789',
-        bankName: 'Glo',
-        status: 'success',
-        bundle: '1.5GB', // Dummy bundle data
-      };
-    default:
-      return {
-        amount: '₦2,000.00',
-        date: '2025-09-21',
-        time: '12:00',
-        type: type,
-        sender: 'Obed Ihekaike',
-        receiver: 'Unknown',
-        sessionId: 'GENERIC123456789',
-        bankName: 'Payyy',
-        status: 'success',
-      };
-  }
-};
-
-// Use dummy data directly for preview/testing
-const dummyTransaction = getDummyTransaction('Airtime'); // Change type as needed
 
 const TransactionImage: React.FC<{ backgroundImage?: any; transaction: Transaction }> = ({ backgroundImage, transaction }) => {
   if (!transaction) {
@@ -96,25 +36,8 @@ const TransactionImage: React.FC<{ backgroundImage?: any; transaction: Transacti
       </View>
     );
   }
-  // Helper to build transaction object for Data
-  const buildDataTransaction = () => {
-    const now = new Date();
-    return {
-      amount: transaction?.price || '',
-      date: now.toISOString().slice(0, 10),
-      time: now.toTimeString().slice(0, 5),
-      type: 'Data',
-      sender: 'Obed Ihekaike', // Replace with actual user if available
-      receiver: transaction?.contact || '',
-      phone: transaction?.contact || '',
-      sessionId: 'DATA' + now.getTime(),
-      bankName: transaction?.network || '',
-      status: 'success',
-      bundle: transaction?.bundle || '',
-    };
-  };
-  // In TransactionImage, use buildDataTransaction if transaction.type === 'Data' and transaction is missing fields
-  const tx: Transaction = transaction?.type === 'Data' ? buildDataTransaction() as Transaction : transaction;
+
+  const tx: Transaction = transaction;
   const viewRef = useRef<View>(null);
 
   const getStatusIcon = () => {
@@ -136,6 +59,8 @@ const TransactionImage: React.FC<{ backgroundImage?: any; transaction: Transacti
         return <Ionicons name="wifi" size={24} color="#7B68EE" />;
       case 'bank transfer':
         return <Ionicons name="card" size={24} color="#50E3C2" />;
+      case 'internal transfer':
+        return <Ionicons name="people" size={24} color="#F5A623" />;
       default:
         return <Ionicons name="swap-horizontal" size={24} color="#F5A623" />;
     }
@@ -191,32 +116,52 @@ const TransactionImage: React.FC<{ backgroundImage?: any; transaction: Transacti
                 )}
               </View>
             </View>
-            {/* Data transaction details */}
-            {tx.type && tx.type.toLowerCase() === 'data' && (
+            
+            {/* Receiver Info - Different layouts for different transaction types */}
+            {tx.receiver && (
               <View style={styles.receiverInfo}>
-                <Text style={styles.receiverLabel}>Recipient:</Text>
-                <Text style={styles.receiverName}>{tx.receiver || tx.phone || 'N/A'}</Text>
-                {tx.phone && (
-                  <Text style={styles.receiverPhone}>{tx.phone}</Text>
-                )}
-                {tx.bundle && (
-                  <Text style={styles.receiverAccount}>Bundle: {tx.bundle}</Text>
-                )}
-                {tx.bankName && (
-                  <Text style={styles.receiverAccount}>Network: {tx.bankName}</Text>
-                )}
-              </View>
-            )}
-            {/* Other transaction types */}
-            {tx.type && tx.type.toLowerCase() !== 'data' && tx.receiver && (
-              <View style={styles.receiverInfo}>
-                <Text style={styles.receiverLabel}>To:</Text>
+                <Text style={styles.receiverLabel}>
+                  {tx.type?.toLowerCase() === 'data' ? 'Recipient:' : 'To:'}
+                </Text>
                 <Text style={styles.receiverName}>{tx.receiver}</Text>
-                {tx.receiverAccount && (
-                  <Text style={styles.receiverAccount}>{tx.receiverAccount}</Text>
+                
+                {/* Data transaction specific details */}
+                {tx.type?.toLowerCase() === 'data' && (
+                  <>
+                    {tx.phone && (
+                      <Text style={styles.receiverPhone}>{tx.phone}</Text>
+                    )}
+                    {tx.bundle && (
+                      <Text style={styles.receiverAccount}>Bundle: {tx.bundle}</Text>
+                    )}
+                    {tx.bankName && (
+                      <Text style={styles.receiverAccount}>Network: {tx.bankName}</Text>
+                    )}
+                  </>
                 )}
-                {tx.phone && (
-                  <Text style={styles.receiverPhone}>{tx.phone}</Text>
+                
+                {/* Internal transfer specific details */}
+                {tx.type?.toLowerCase() === 'internal transfer' && (
+                  <>
+                    {tx.usertag && (
+                      <Text style={styles.receiverAccount}>Usertag: {tx.usertag}</Text>
+                    )}
+                    {tx.accountNumber && (
+                      <Text style={styles.receiverAccount}>Account: {tx.accountNumber}</Text>
+                    )}
+                  </>
+                )}
+                
+                {/* Other transaction types */}
+                {tx.type?.toLowerCase() !== 'data' && tx.type?.toLowerCase() !== 'internal transfer' && (
+                  <>
+                    {tx.receiverAccount && (
+                      <Text style={styles.receiverAccount}>{tx.receiverAccount}</Text>
+                    )}
+                    {tx.phone && (
+                      <Text style={styles.receiverPhone}>{tx.phone}</Text>
+                    )}
+                  </>
                 )}
               </View>
             )}
@@ -262,6 +207,7 @@ const styles = StyleSheet.create({
     height: 900,
     position: 'relative',
     backgroundColor: '#f8fafc',
+    borderRadius: 24,
     overflow: 'hidden',
     alignSelf: 'center',
     shadowColor: '#000',
@@ -285,7 +231,7 @@ const styles = StyleSheet.create({
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(74, 144, 226, 0.08)', // fallback color, adjust as needed
+    backgroundColor: 'rgba(74, 144, 226, 0.08)',
   },
   receiptCard: {
     flex: 1,
@@ -293,7 +239,6 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: 20,
     padding: 32,
-    // backdropFilter is not supported in React Native
   },
   header: {
     marginBottom: 24,
@@ -303,19 +248,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 16,
-  },
-  logoContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#4A90E2',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '900',
   },
   brandName: {
     fontSize: 30,
@@ -374,31 +306,9 @@ const styles = StyleSheet.create({
   userSection: {
     marginBottom: 32,
   },
-  userCard: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-  },
-  avatarPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#e2e8f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
   },
   userDetails: {
     flex: 1,
@@ -413,10 +323,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#64748b',
     fontWeight: '500',
-  },
-  transferArrow: {
-    alignItems: 'center',
-    marginVertical: 12,
   },
   receiverInfo: {
     paddingTop: 12,
@@ -458,15 +364,6 @@ const styles = StyleSheet.create({
   detailsGrid: {
     flexDirection: 'column',
     justifyContent: 'space-between',
-  },
-  detailItem: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-    padding: 16,
-    borderRadius: 12,
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   detailLabel: {
     fontSize: 18,

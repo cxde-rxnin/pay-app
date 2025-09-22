@@ -31,16 +31,18 @@ interface DataModalProps {
 }
 
 type RootStackParamList = {
-  Loading: { type: string; network: string; contact: string; bundle: string; price: string };
+  Loading: { type: string; network?: string; contact?: string; bundle?: string; price?: string; usertag?: string; amount?: string };
   TransactionResultScreen: {
     status: string;
     message: string;
     transaction: {
       type: string;
-      network: string;
-      contact: string;
-      bundle: string;
-      price: string;
+      network?: string;
+      contact?: string;
+      bundle?: string;
+      price?: string;
+      usertag?: string;
+      amount?: string;
     };  
   };
 };

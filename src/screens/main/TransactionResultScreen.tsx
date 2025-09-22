@@ -18,7 +18,19 @@ const TransactionResultScreen: React.FC = () => {
   const route = useRoute();
   // @ts-ignore
   const { status, message, transaction } = route.params || {};
-  const gif = status === 'success' ? resultGifs.success : resultGifs.error;
+  
+  // Use sent.gif for internal transfers, paid.gif for other successful transactions
+  const getGif = () => {
+    if (status === 'success') {
+      if (transaction?.type === 'Internal Transfer') {
+        return resultGifs.sent;
+      }
+      return resultGifs.success;
+    }
+    return resultGifs.error;
+  };
+
+  const gif = getGif();
 
   // transaction info is now passed from the modal flow
   const transactionInfo = transaction || {};

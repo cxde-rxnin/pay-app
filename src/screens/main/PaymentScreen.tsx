@@ -9,7 +9,7 @@ const PaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   // @ts-ignore
-  const { network, contact, amount, bundle, price } = route.params || {};
+  const { type, network, contact, amount, bundle, price, usertag, accountNumber, accountName } = route.params || {};
 
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,9 @@ const PaymentScreen: React.FC = () => {
         const isSuccess = pin !== '0000'; // Example: 0000 fails
         const now = new Date();
         let transactionObj;
-        if (bundle && price) {
+        
+        if (type === 'Data') {
+          // Data transaction
           transactionObj = {
             type: 'Data',
             network,
@@ -40,14 +42,32 @@ const PaymentScreen: React.FC = () => {
             amount: price,
             date: now.toISOString().slice(0, 10),
             time: now.toTimeString().slice(0, 5),
-            sender: 'Obed Ihekaike', // Replace with actual user if available
+            sender: 'Obed Ihekaike',
             receiver: contact,
             phone: contact,
             sessionId: 'DATA' + now.getTime(),
             bankName: network,
             status: isSuccess ? 'success' : 'error',
           };
+        } else if (type === 'internal') {
+          // Internal transfer (usertag or account)
+          const recipient = usertag || accountName || 'Unknown';
+          transactionObj = {
+            type: 'Internal Transfer',
+            amount,
+            date: now.toISOString().slice(0, 10),
+            time: now.toTimeString().slice(0, 5),
+            sender: 'Obed Ihekaike',
+            receiver: recipient,
+            usertag,
+            accountNumber,
+            accountName,
+            sessionId: 'INT' + now.getTime(),
+            bankName: 'Payyy',
+            status: isSuccess ? 'success' : 'error',
+          };
         } else {
+          // Airtime transaction
           transactionObj = {
             type: 'Airtime',
             network,
@@ -63,10 +83,22 @@ const PaymentScreen: React.FC = () => {
             status: isSuccess ? 'success' : 'error',
           };
         }
+
+        // Create appropriate success message
+        let successMessage = '';
+        if (type === 'Data') {
+          successMessage = `${bundle} sent to ${contact}`;
+        } else if (type === 'internal') {
+          const recipient = usertag || accountName || contact;
+          successMessage = `${amount} is on its way to ${recipient}`;
+        } else {
+          successMessage = `${amount} sent to ${contact}`;
+        }
+
         (navigation as any).replace('TransactionResult', {
           status: isSuccess ? 'success' : 'error',
           message: isSuccess
-            ? `${transactionObj.type} sent to ${contact}`
+            ? successMessage
             : 'Insufficient balance or invalid PIN.',
           transaction: transactionObj,
         });

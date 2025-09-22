@@ -7,7 +7,7 @@ const LoadingScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   // @ts-ignore - Extract all possible route parameters
-  const { type, network, contact, amount, bundle, price } = route.params || {};
+  const { type, network, contact, amount, bundle, price, usertag, accountNumber, accountName } = route.params || {};
 
   const spinAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -31,6 +31,15 @@ const LoadingScreen: React.FC = () => {
           bundle, 
           price 
         });
+      } else if (type === 'internal') {
+        // For internal transfers (usertag or account number)
+        (navigation as any).replace('Payment', { 
+          type,
+          usertag,
+          accountNumber,
+          accountName, 
+          amount 
+        });
       } else {
         // For airtime or other transactions
         (navigation as any).replace('Payment', { 
@@ -42,7 +51,7 @@ const LoadingScreen: React.FC = () => {
       }
     }, 5000);
     return () => clearTimeout(timer);
-  }, [navigation, type, network, contact, amount, bundle, price, spinAnim]);
+  }, [navigation, type, network, contact, amount, bundle, price, usertag, accountNumber, accountName, spinAnim]);
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],
@@ -55,6 +64,15 @@ const LoadingScreen: React.FC = () => {
       return `Purchasing ${bundle || 'data bundle'} for ${contact}...`;
     } else if (type === 'Airtime') {
       return `Sending ${amount || 'airtime'} to ${contact}...`;
+    } else if (type === 'internal') {
+      // Internal transfer - check if it's usertag or account number based
+      if (usertag) {
+        return `Sending ${amount} to ${usertag}...`;
+      } else if (accountName) {
+        return `Sending ${amount} to ${accountName}...`;
+      } else {
+        return `Processing internal transfer of ${amount}...`;
+      }
     }
     return 'Processing Transaction...';
   };
@@ -75,7 +93,9 @@ const LoadingScreen: React.FC = () => {
       }} />
       <Text style={styles.text}>{getLoadingMessage()}</Text>
       <Text style={styles.subText}>
-        {type === 'Data' ? `${network} • ${price}` : `${network} • ${amount}`}
+        {type === 'Data' ? `${network} • ${price}` : 
+         type === 'internal' ? (usertag ? `Usertag Transfer • ${amount}` : `Account Transfer • ${amount}`) :
+         `${network} • ${amount}`}
       </Text>
     </View>
   );

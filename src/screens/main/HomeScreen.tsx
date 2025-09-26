@@ -13,6 +13,8 @@ import AirtimeModal from '../modals/AirtimeModal';
 import DataModal from '../modals/DataModal';
 import UsertagTransferModal from '../modals/UsertagTransferModal';
 import HistoryModal from '../modals/HistoryModal';
+import SendToLemoModal from '../modals/SendToLemoModal';
+import QrCodeModal from '../modals/QrCodeModal';
 
 type AppTabParamList = {
   Home: undefined;
@@ -32,6 +34,8 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [showDataModal, setShowDataModal] = useState(false);
   const [showUsertagModal, setShowUsertagModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showSendToLemoModal, setShowSendToLemoModal] = useState(false);
+  const [showQrCodeModal, setShowQrCodeModal] = useState(false);
   const user = { name: 'Obed', accountNumber: '1234567890', bankName: 'Lemo Bank' };
 
   return (
@@ -50,6 +54,8 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
       <DataModal visible={showDataModal} onClose={() => setShowDataModal(false)} />
       <UsertagTransferModal visible={showUsertagModal} onClose={() => setShowUsertagModal(false)} />
       <HistoryModal visible={showHistoryModal} onClose={() => setShowHistoryModal(false)} />
+      <SendToLemoModal visible={showSendToLemoModal} onClose={() => setShowSendToLemoModal(false)} />
+      <QrCodeModal visible={showQrCodeModal} onClose={() => setShowQrCodeModal(false)} />
       <View style={{ paddingHorizontal: 20, paddingTop: 32 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, paddingTop: 40 }}>
           <Text style={{ fontSize: 24, color: colors.text, fontWeight: '900' }}>Hello, Obed</Text>
@@ -106,14 +112,14 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
                 />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowUsertagModal(true)}>
-              <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
+            <TouchableOpacity onPress={() => setShowQrCodeModal(true)}>
+                <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
                 <Image
                   source={require('../../assets/tag.png')}
                   style={{ width: 48, height: 48, borderRadius: 8 }}
                   resizeMode="cover"
                 />
-              </View>
+                </View>
             </TouchableOpacity>
           </View>
         </View>

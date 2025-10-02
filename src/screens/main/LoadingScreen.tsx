@@ -7,7 +7,7 @@ const LoadingScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   // @ts-ignore - Extract all possible route parameters
-  const { type, network, contact, amount, bundle, price, usertag, accountNumber, accountName } = route.params || {};
+  const { type, network, contact, amount, bundle, price, usertag, accountNumber, accountName, bankName } = route.params || {};
 
   const spinAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -40,6 +40,15 @@ const LoadingScreen: React.FC = () => {
           accountName, 
           amount 
         });
+      } else if (type === 'bank') {
+        // For bank transfers
+        (navigation as any).replace('Payment', { 
+          type,
+          bankName,
+          accountNumber,
+          accountName, 
+          amount 
+        });
       } else {
         // For airtime or other transactions
         (navigation as any).replace('Payment', { 
@@ -51,7 +60,7 @@ const LoadingScreen: React.FC = () => {
       }
     }, 5000);
     return () => clearTimeout(timer);
-  }, [navigation, type, network, contact, amount, bundle, price, usertag, accountNumber, accountName, spinAnim]);
+  }, [navigation, type, network, contact, amount, bundle, price, usertag, accountNumber, accountName, bankName, spinAnim]);
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],
@@ -73,6 +82,8 @@ const LoadingScreen: React.FC = () => {
       } else {
         return `Processing internal transfer of ${amount}...`;
       }
+    } else if (type === 'bank') {
+      return `Sending ${amount} to ${accountName}...`;
     }
     return 'Processing Transaction...';
   };
@@ -95,6 +106,7 @@ const LoadingScreen: React.FC = () => {
       <Text style={styles.subText}>
         {type === 'Data' ? `${network} • ${price}` : 
          type === 'internal' ? (usertag ? `Usertag Transfer • ${amount}` : `Account Transfer • ${amount}`) :
+         type === 'bank' ? `Bank Transfer • ${amount}` :
          `${network} • ${amount}`}
       </Text>
     </View>

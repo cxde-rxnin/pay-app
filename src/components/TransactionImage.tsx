@@ -26,6 +26,8 @@ export interface Transaction {
   usertag?: string; // Added for internal transfers
   accountNumber?: string; // Added for internal transfers
   accountName?: string; // Added for internal transfers
+  fee?: string; // Added for bank transfers
+  total?: string; // Added for bank transfers
 }
 
 const TransactionImage: React.FC<{ backgroundImage?: any; transaction: Transaction }> = ({ backgroundImage, transaction }) => {
@@ -152,8 +154,20 @@ const TransactionImage: React.FC<{ backgroundImage?: any; transaction: Transacti
                   </>
                 )}
                 
+                {/* Bank transfer specific details */}
+                {tx.type?.toLowerCase() === 'bank transfer' && (
+                  <>
+                    {tx.accountNumber && (
+                      <Text style={styles.receiverAccount}>Account: {tx.accountNumber}</Text>
+                    )}
+                    {tx.bankName && (
+                      <Text style={styles.receiverAccount}>Bank: {tx.bankName}</Text>
+                    )}
+                  </>
+                )}
+                
                 {/* Other transaction types */}
-                {tx.type?.toLowerCase() !== 'data' && tx.type?.toLowerCase() !== 'internal transfer' && (
+                {tx.type?.toLowerCase() !== 'data' && tx.type?.toLowerCase() !== 'internal transfer' && tx.type?.toLowerCase() !== 'bank transfer' && (
                   <>
                     {tx.receiverAccount && (
                       <Text style={styles.receiverAccount}>{tx.receiverAccount}</Text>

@@ -9,7 +9,7 @@ const PaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   // @ts-ignore
-  const { type, network, contact, amount, bundle, price, usertag, accountNumber, accountName } = route.params || {};
+  const { type, network, contact, amount, bundle, price, usertag, accountNumber, accountName, bankName } = route.params || {};
 
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
@@ -66,6 +66,23 @@ const PaymentScreen: React.FC = () => {
             bankName: 'Payyy',
             status: isSuccess ? 'success' : 'error',
           };
+        } else if (type === 'bank') {
+          // Bank transfer
+          transactionObj = {
+            type: 'Bank Transfer',
+            amount,
+            fee: '₦10',
+            total: `₦${(parseFloat(amount.replace('₦', '').replace(',', '')) + 10).toLocaleString()}`,
+            date: now.toISOString().slice(0, 10),
+            time: now.toTimeString().slice(0, 5),
+            sender: 'Obed Ihekaike',
+            receiver: accountName,
+            accountNumber,
+            accountName,
+            bankName,
+            sessionId: 'BANK' + now.getTime(),
+            status: isSuccess ? 'success' : 'error',
+          };
         } else {
           // Airtime transaction
           transactionObj = {
@@ -91,6 +108,8 @@ const PaymentScreen: React.FC = () => {
         } else if (type === 'internal') {
           const recipient = usertag || accountName || contact;
           successMessage = `${amount} is on its way to ${recipient}`;
+        } else if (type === 'bank') {
+          successMessage = `${amount} is on its way to ${accountName}`;
         } else {
           successMessage = `${amount} sent to ${contact}`;
         }

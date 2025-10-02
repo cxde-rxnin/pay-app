@@ -6,6 +6,11 @@ import KYCStack from './KYCStack';
 import AppTabs from './AppTabs';
 import ModalStack from './ModalStack';
 import TransactionResultScreen from '../screens/main/TransactionResultScreen';
+import SendToLemoScreen from '../screens/main/SendToLemoScreen';
+import SendToLemoSummaryScreen from '../screens/main/SendToLemoSummaryScreen';
+import SendToBankScreen from '../screens/main/SendToBankScreen';
+import SendToBankSummaryScreen from '../screens/main/SendToBankSummaryScreen';
+import TransactionDetailsScreen from '../screens/modals/TransactionDetailsScreen';
 
 const RootStack = createStackNavigator();
 
@@ -18,6 +23,11 @@ const RootNavigator = () => (
       <RootStack.Screen name="Modals" component={ModalStack} options={{ presentation: 'modal' }} />
       <RootStack.Screen name="Loading" component={require('../screens/main/LoadingScreen').default} />
       <RootStack.Screen name="Payment" component={require('../screens/main/PaymentScreen').default} />
+      <RootStack.Screen name="SendToLemo" component={SendToLemoScreen} />
+      <RootStack.Screen name="SendToLemoSummary" component={SendToLemoSummaryScreen} />
+      <RootStack.Screen name="SendToBank" component={SendToBankScreen} />
+      <RootStack.Screen name="SendToBankSummary" component={SendToBankSummaryScreen} />
+      <RootStack.Screen name="TransactionDetails" component={TransactionDetailsScreen} />
       <RootStack.Screen name="TransactionResult" component={TransactionResultScreen} />
     </RootStack.Navigator>
   </NavigationContainer>

@@ -178,8 +178,9 @@ const QrCodeModal: React.FC<QRCodeModalProps> = ({ visible, onClose, userTag = "
       <TouchableOpacity 
         style={{
           backgroundColor: qrImageLoading ? colors.gray : colors.primary,
-          paddingHorizontal: 30,
-          paddingVertical: 12,
+          width: '100%',
+          paddingHorizontal: 50,
+          paddingVertical: 16,
           borderRadius: 10,
           marginTop: 20,
           opacity: qrImageLoading ? 0.6 : 1,
@@ -187,7 +188,7 @@ const QrCodeModal: React.FC<QRCodeModalProps> = ({ visible, onClose, userTag = "
         onPress={handleShareQr}
         disabled={qrImageLoading}
       >
-        <Text style={{ color: colors.white, fontSize: 16, fontWeight: '600' }}>
+        <Text style={{ color: colors.white, fontSize: 16, fontWeight: '600', textAlign: 'center' }}>
           {qrImageLoading ? 'Generating...' : 'Share QR Code'}
         </Text>
       </TouchableOpacity>

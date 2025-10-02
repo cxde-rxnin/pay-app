@@ -19,10 +19,10 @@ const TransactionResultScreen: React.FC = () => {
   // @ts-ignore
   const { status, message, transaction } = route.params || {};
   
-  // Use sent.gif for internal transfers, paid.gif for other successful transactions
+  // Use sent.gif for internal transfers and bank transfers, paid.gif for other successful transactions
   const getGif = () => {
     if (status === 'success') {
-      if (transaction?.type === 'Internal Transfer') {
+      if (transaction?.type === 'Internal Transfer' || transaction?.type === 'Bank Transfer') {
         return resultGifs.sent;
       }
       return resultGifs.success;

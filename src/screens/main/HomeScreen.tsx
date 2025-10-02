@@ -6,6 +6,8 @@ import Button from '../../components/Button';
 import ServiceTile from '../../components/ServiceTile';
 import colors from '../../theme/colors';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { CompositeNavigationProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { Notification } from 'iconsax-react-nativejs';
 import AddMoneyModal from '../modals/AddMoneyModal';
 import SendMoneyModal from '../modals/SendMoneyModal';
@@ -16,6 +18,15 @@ import HistoryModal from '../modals/HistoryModal';
 import SendToLemoModal from '../modals/SendToLemoModal';
 import QrCodeModal from '../modals/QrCodeModal';
 
+type RootStackParamList = {
+  Auth: undefined;
+  KYC: undefined;
+  App: undefined;
+  SendToLemo: undefined;
+  SendToBank: undefined;
+  TransactionDetails: any;
+};
+
 type AppTabParamList = {
   Home: undefined;
   Transactions: undefined;
@@ -23,8 +34,13 @@ type AppTabParamList = {
   Modals: { screen: string };
 };
 
+type HomeScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<AppTabParamList, 'Home'>,
+  StackNavigationProp<RootStackParamList>
+>;
+
 type ScreenProps = {
-  navigation: BottomTabNavigationProp<AppTabParamList, 'Home'>;
+  navigation: HomeScreenNavigationProp;
 };
 
 const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
@@ -38,11 +54,20 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [showQrCodeModal, setShowQrCodeModal] = useState(false);
   const user = { name: 'Obed', accountNumber: '1234567890', bankName: 'Lemo Bank' };
 
+  const handleSendMoneySelect = (option: 'lemo' | 'bank') => {
+    setShowSendMoney(false);
+    if (option === 'lemo') {
+      navigation.navigate('SendToLemo');
+    } else if (option === 'bank') {
+      navigation.navigate('SendToBank');
+    }
+  };
+
   return (
     <ScrollView style={[styles.screen, { backgroundColor: '#F7F8FA', paddingHorizontal: 0 }]}
       contentContainerStyle={{ paddingBottom: 32 }}>
       <AddMoneyModal visible={showAddMoney} onClose={() => setShowAddMoney(false)} user={user} />
-      <SendMoneyModal visible={showSendMoney} onClose={() => setShowSendMoney(false)} onSelect={() => setShowSendMoney(false)} />
+      <SendMoneyModal visible={showSendMoney} onClose={() => setShowSendMoney(false)} onSelect={handleSendMoneySelect} />
       <AirtimeModal
         visible={showAirtimeModal}
         onClose={() => setShowAirtimeModal(false)}

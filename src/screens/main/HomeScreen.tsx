@@ -5,6 +5,7 @@ import BalanceCard from '../../components/BalanceCard';
 import Button from '../../components/Button';
 import ServiceTile from '../../components/ServiceTile';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -83,7 +84,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
       <QrCodeModal visible={showQrCodeModal} onClose={() => setShowQrCodeModal(false)} />
       <View style={{ paddingHorizontal: 20, paddingTop: 32 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, paddingTop: 40 }}>
-          <Text style={{ fontSize: 24, color: colors.text, fontWeight: '900' }}>Hello, Obed</Text>
+          <Text style={{ fontSize: 24, color: colors.text, fontWeight: '900', fontFamily: fontConfig.heading }}>Hello, Obed</Text>
           <Notification
             size={26}
             color={colors.primary}
@@ -100,7 +101,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
           <Button title="Send Money"  onPress={() => setShowSendMoney(true)} style={{ flex: 1, marginLeft: 10 }} />
         </View>
 
-        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 24, marginTop: 24 }}>Quick Action</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 24, marginTop: 24, fontFamily: fontConfig.heading }}>Quick Action</Text>
         <View
           style={{
             backgroundColor: '#ffffff',
@@ -150,7 +151,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
         </View>
 
         <View>
-          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 24, marginTop: 24 }}>Recent Transactions</Text>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 24, marginTop: 24, fontFamily: fontConfig.heading }}>Recent Transactions</Text>
           <View style={{ padding: 60 }}>
             <Text style={{ color: colors.gray, fontSize: 16, textAlign: 'center' }}>
               No recent transactions yet.

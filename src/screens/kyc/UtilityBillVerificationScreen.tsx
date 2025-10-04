@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
+import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type KYCStackParamList = {
@@ -16,7 +17,7 @@ type ScreenProps = {
 const UtilityBillVerificationScreen: React.FC<ScreenProps> = ({ navigation }) => {
   return (
     <View style={styles.screen}>
-      <Text style={[styles.heading, { fontSize: 24 }]}>Utility bill</Text>
+      <Text style={[styles.heading, { fontSize: 24, fontFamily: fontConfig.heading }]}>Utility bill</Text>
       <Text style={styles.subheading}>Upload a recent bill (water, power or internet)</Text>
       <Button title="Upload Utility Bill" onPress={() => {}} style={{ marginTop: 16 }} />
       <Button title="Finish" onPress={() => navigation.navigate('App')} style={{ marginTop: 16 }} />

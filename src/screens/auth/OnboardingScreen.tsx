@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Image, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Button from '../../components/Button';
 import styles from '../../theme/styles';
+import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 export type AuthStackParamList = {
@@ -25,7 +26,7 @@ const OnboardingScreen: React.FC<ScreenProps> = ({ navigation }) => (
           source={require('../../assets/Onboarding.png')}
           style={{ width: 370, height: 500, resizeMode: 'contain', position: 'relative', bottom: -40 }}
         />
-        <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 16, textAlign: 'left', marginTop: 32 }}>Welcome to the future of payments</Text>
+        <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 16, textAlign: 'left', marginTop: 32, fontFamily: fontConfig.heading }}>Welcome to the future of payments</Text>
         <Text style={{ fontSize: 16, marginBottom: 32, textAlign: 'left', paddingRight: 60 }}>
           Create your account and explore features to make payments easy and secure.
         </Text>

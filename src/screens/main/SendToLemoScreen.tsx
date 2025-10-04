@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { ArrowLeft, User } from 'iconsax-react-nativejs';
 import Button from '../../components/Button';
 
@@ -80,7 +81,7 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, textAlign: 'center', flex: 1, marginLeft: -20 }}>
+          <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, textAlign: 'center', flex: 1, marginLeft: -20, fontFamily: fontConfig.heading }}>
             Send to Lemo
           </Text>
         </View>
@@ -144,6 +145,7 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
                   fontWeight: '700',
                   color: colors.text,
                   paddingVertical: 12,
+                  fontFamily: fontConfig.heading,
                 }}
                 placeholder="0"
                 placeholderTextColor={colors.gray + '60'}
@@ -203,7 +205,7 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
               <Text style={{ fontSize: 14, color: colors.gray, marginBottom: 8 }}>
                 You're sending
               </Text>
-              <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 4 }}>
+              <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 4, fontFamily: fontConfig.heading }}>
                 ₦{parseInt(amount).toLocaleString()}
               </Text>
               <Text style={{ fontSize: 14, color: colors.gray }}>

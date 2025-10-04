@@ -3,6 +3,7 @@ import { View, Text, Modal, StyleSheet, Animated, Dimensions, TouchableWithoutFe
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { BlurView } from 'expo-blur';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 
 const { height } = Dimensions.get('window');
 
@@ -185,6 +186,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 18,
     textAlign: 'left',
+    fontFamily: fontConfig.heading,
   },
   infoRow: {
     flexDirection: 'row',

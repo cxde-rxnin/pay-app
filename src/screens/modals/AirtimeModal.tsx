@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, KeyboardAvo
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import * as Contacts from 'expo-contacts';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { BlurView } from 'expo-blur';
 import Button from '../../components/Button';
 import { useNavigation } from '@react-navigation/native';
@@ -271,7 +272,7 @@ const AirtimeModal: React.FC<AirtimeModalProps> = ({ visible, onClose, onContinu
           {step === 2 && (
             <View>
               <View style={{ alignItems: 'flex-start', marginBottom: 18, padding: 10, backgroundColor: '#F7F8FA', borderRadius: 10 }}>
-                <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}><Text>{selectedNetwork}</Text></Text>
+                <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, fontFamily: fontConfig.heading }}><Text>{selectedNetwork}</Text></Text>
                 <Text style={{ fontSize: 16, color: colors.gray, marginTop: 4 }}>{contact}</Text>
               </View>
               <TextInput
@@ -327,7 +328,7 @@ const AirtimeModal: React.FC<AirtimeModalProps> = ({ visible, onClose, onContinu
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' }} />
           </TouchableWithoutFeedback>
           <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, maxHeight: height * 0.6, backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18 }}>
-            <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12, textAlign: 'left' }}>Select Contact</Text>
+            <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12, textAlign: 'left', fontFamily: fontConfig.heading }}>Select Contact</Text>
             <Animated.ScrollView>
               {contactsList.map((contact, idx) => (
                 <TouchableOpacity
@@ -394,6 +395,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     color: colors.text,
     textAlign: 'left',
+    fontFamily: fontConfig.heading,
   },
   label: {
     fontSize: 16,

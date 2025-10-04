@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share, Alert } fr
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { captureRef } from 'react-native-view-shot';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { 
   ArrowLeft, 
   TickCircle, 
@@ -104,7 +105,7 @@ const TransactionDetailsScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={detailStyles.backButton}>
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={detailStyles.headerTitle}>Transaction Details</Text>
+        <Text style={[detailStyles.headerTitle, { fontFamily: fontConfig.heading }]}>Transaction Details</Text>
         <TouchableOpacity onPress={handleShare} style={detailStyles.shareButton}>
           <Export size={22} color={colors.text} />
         </TouchableOpacity>
@@ -125,7 +126,7 @@ const TransactionDetailsScreen: React.FC = () => {
           <View style={detailStyles.amountContainer}>
             <Text style={[
               detailStyles.amount,
-              { color: transaction.amount >= 0 ? colors.success : colors.text }
+              { color: transaction.amount >= 0 ? colors.success : colors.text, fontFamily: fontConfig.heading }
             ]}>
               {transaction.amount >= 0 ? '+' : '-'}₦{Math.abs(transaction.amount).toLocaleString()}
             </Text>

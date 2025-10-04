@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { ArrowLeft, User } from 'iconsax-react-nativejs';
 import Button from '../../components/Button';
 
@@ -37,7 +38,7 @@ const SendToLemoSummaryScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 16 }}>
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, textAlign: 'center', flex: 1, marginLeft: -24 }}>
+        <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, textAlign: 'center', flex: 1, marginLeft: -24, fontFamily: fontConfig.heading }}>
           Transaction Summary
         </Text>
       </View>
@@ -55,7 +56,7 @@ const SendToLemoSummaryScreen: React.FC = () => {
             <Text style={{ fontSize: 14, color: colors.gray, marginBottom: 12 }}>
               You're sending
             </Text>
-            <Text style={{ fontSize: 48, fontWeight: '900', color: colors.text, marginBottom: 20 }}>
+            <Text style={{ fontSize: 48, fontWeight: '900', color: colors.text, marginBottom: 20, fontFamily: fontConfig.heading }}>
               ₦{parseInt(amount).toLocaleString()}
             </Text>
             

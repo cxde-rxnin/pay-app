@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableWithoutFeedback, TextInput, Alert } from 'react-native';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 
 interface SendToLemoModalProps {
   visible: boolean;
@@ -35,7 +36,8 @@ const SendToLemoModal: React.FC<SendToLemoModalProps> = ({ visible, onClose }) =
             fontWeight: 'bold', 
             marginBottom: 20, 
             color: colors.text,
-            textAlign: 'center' 
+            textAlign: 'center',
+            fontFamily: fontConfig.heading,
           }}>
             Send to Lemo
           </Text>
@@ -45,7 +47,7 @@ const SendToLemoModal: React.FC<SendToLemoModalProps> = ({ visible, onClose }) =
           </Text>
           
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Text style={{ fontSize: 18, color: colors.primary, fontWeight: 'bold', marginRight: 8 }}>@</Text>
+            <Text style={{ fontSize: 18, color: colors.primary, fontWeight: 'bold', marginRight: 8, fontFamily: fontConfig.heading }}>@</Text>
             <TextInput
               value={tag}
               onChangeText={setTag}
@@ -91,7 +93,7 @@ const SendToLemoModal: React.FC<SendToLemoModalProps> = ({ visible, onClose }) =
                 paddingVertical: 15, 
                 alignItems: 'center' 
               }}>
-                <Text style={{ color: colors.text, fontSize: 16, fontWeight: 'bold' }}>Cancel</Text>
+                <Text style={{ color: colors.text, fontSize: 16, fontWeight: 'bold', fontFamily: fontConfig.heading }}>Cancel</Text>
               </View>
             </TouchableWithoutFeedback>
             
@@ -106,7 +108,7 @@ const SendToLemoModal: React.FC<SendToLemoModalProps> = ({ visible, onClose }) =
                 paddingVertical: 15, 
                 alignItems: 'center' 
               }}>
-                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Continue</Text>
+                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold', fontFamily: fontConfig.heading }}>Continue</Text>
               </View>
             </TouchableWithoutFeedback>
           </View>

@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, FlatList } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, FlatList, Animated, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import { BlurView } from 'expo-blur';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { ArrowLeft, ArrowDown2, Bank } from 'iconsax-react-nativejs';
 import Button from '../../components/Button';
+
+const { height } = Dimensions.get('window');
 
 type RootStackParamList = {
   SendToBank: undefined;
@@ -63,6 +68,80 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
   const [amount, setAmount] = useState('');
   const [selectedStamp, setSelectedStamp] = useState<string | null>(null);
   const [showBankPicker, setShowBankPicker] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  const slideAnim = useRef(new Animated.Value(height)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+
+  const handleCloseBankPicker = () => {
+    Animated.parallel([
+      Animated.spring(slideAnim, {
+        toValue: height,
+        useNativeDriver: true,
+        speed: 20,
+        bounciness: 0,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      })
+    ]).start(() => {
+      setModalVisible(false);
+      setShowBankPicker(false);
+    });
+  };
+
+  const onGestureEvent = Animated.event(
+    [{ nativeEvent: { translationY: translateY } }],
+    { useNativeDriver: true }
+  );
+
+  const onHandlerStateChange = (event: any) => {
+    if (event.nativeEvent.oldState === State.ACTIVE) {
+      const { translationY: dragDistance, velocityY } = event.nativeEvent;
+      
+      if (dragDistance > 100 || velocityY > 500) {
+        translateY.setValue(0);
+        handleCloseBankPicker();
+      } else {
+        Animated.spring(translateY, {
+          toValue: 0,
+          useNativeDriver: true,
+          speed: 20,
+          bounciness: 8,
+        }).start();
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (showBankPicker) {
+      setModalVisible(true);
+      slideAnim.setValue(height);
+      fadeAnim.setValue(0);
+      translateY.setValue(0);
+      
+      setTimeout(() => {
+        Animated.parallel([
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            speed: 18,
+            bounciness: 8,
+          }),
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          })
+        ]).start();
+      }, 50);
+    } else if (modalVisible) {
+      handleCloseBankPicker();
+    }
+  }, [showBankPicker, modalVisible, slideAnim, fadeAnim, translateY]);
 
   const handleStampPress = (value: string) => {
     setAmount(value);
@@ -145,7 +224,7 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 16 }}>
             <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>
+          <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text, fontFamily: fontConfig.heading }}>
             Send to Bank
           </Text>
         </View>
@@ -305,7 +384,7 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
               <Text style={{ fontSize: 14, color: colors.gray, marginBottom: 8 }}>
                 You're sending
               </Text>
-              <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 4 }}>
+              <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 4, fontFamily: fontConfig.heading }}>
                 ₦{parseInt(amount).toLocaleString()}
               </Text>
               <Text style={{ fontSize: 14, color: colors.gray }}>
@@ -339,61 +418,102 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
       </View>
 
       {/* Bank Picker Modal */}
-      <Modal
-        visible={showBankPicker}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowBankPicker(false)}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
-          <View style={{
-            backgroundColor: colors.white,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            maxHeight: '70%',
-          }}>
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
+      {modalVisible && (
+        <Modal
+          visible={modalVisible}
+          animationType="none"
+          transparent
+          onRequestClose={handleCloseBankPicker}
+        >
+          <TouchableWithoutFeedback onPress={handleCloseBankPicker}>
+            <Animated.View style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.85)',
+              justifyContent: 'center',
               alignItems: 'center',
-              padding: 20,
-              borderBottomWidth: 1,
-              borderBottomColor: colors.gray + '20',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              opacity: fadeAnim,
             }}>
-              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>
-                Select Bank
-              </Text>
-              <TouchableOpacity onPress={() => setShowBankPicker(false)}>
-                <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>
-                  Close
+              <BlurView style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} intensity={20} tint="dark" />
+            </Animated.View>
+          </TouchableWithoutFeedback>
+          <PanGestureHandler
+            onGestureEvent={onGestureEvent}
+            onHandlerStateChange={onHandlerStateChange}
+            activeOffsetY={10}
+            failOffsetY={-10}
+          >
+            <Animated.View style={{
+              backgroundColor: colors.white,
+              borderTopLeftRadius: 35,
+              borderTopRightRadius: 35,
+              maxHeight: '70%',
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              transform: [
+                { translateY: slideAnim },
+                { translateY: translateY }
+              ]
+            }}>
+              <View style={{
+                width: 40,
+                height: 4,
+                backgroundColor: colors.gray,
+                borderRadius: 2,
+                alignSelf: 'center',
+                marginTop: 12,
+                marginBottom: 8,
+                opacity: 0.4,
+              }} />
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 20,
+                borderBottomWidth: 1,
+                borderBottomColor: colors.gray + '20',
+              }}>
+                <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>
+                  Select Bank
                 </Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={nigerianBanks}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={{
-                    padding: 16,
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.gray + '10',
-                  }}
-                  onPress={() => handleBankSelect(item)}
-                >
-                  <Text style={{
-                    fontSize: 16,
-                    color: colors.text,
-                    fontWeight: bankName === item ? '600' : '400',
-                  }}>
-                    {item}
+                <TouchableOpacity onPress={handleCloseBankPicker}>
+                  <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>
+                    Close
                   </Text>
                 </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
+              </View>
+              <FlatList
+                data={nigerianBanks}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={{
+                      padding: 16,
+                      borderBottomWidth: 1,
+                      borderBottomColor: colors.gray + '10',
+                    }}
+                    onPress={() => handleBankSelect(item)}
+                  >
+                    <Text style={{
+                      fontSize: 16,
+                      color: colors.text,
+                      fontWeight: bankName === item ? '600' : '400',
+                    }}>
+                      {item}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </Animated.View>
+          </PanGestureHandler>
+        </Modal>
+      )}
     </View>
   );
 };

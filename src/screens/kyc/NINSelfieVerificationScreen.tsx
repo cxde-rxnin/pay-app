@@ -3,6 +3,7 @@ import { View, Text, TextInput } from 'react-native';
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type KYCStackParamList = {
@@ -20,7 +21,7 @@ const NINSelfieVerificationScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [nin, setNin] = useState('');
   return (
     <View style={styles.screen}>
-      <Text style={[styles.heading, { fontSize: 24 }]}>NIN & selfie</Text>
+      <Text style={[styles.heading, { fontSize: 24, fontFamily: fontConfig.heading }]}>NIN & selfie</Text>
       <Text style={[styles.subheading, { marginTop: 6 }]}>Provide your NIN and a quick selfie to continue</Text>
       <Text style={{ marginTop: 20, color: colors.primary }}>NIN</Text>
       <TextInput style={[styles.body, field, { marginTop: 8 }]} placeholder="11-digit NIN" value={nin} onChangeText={setNin} keyboardType="number-pad" maxLength={11} />

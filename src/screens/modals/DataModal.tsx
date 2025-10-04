@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Platform, Animated, Dimensions, TouchableWithoutFeedback, Keyboard, Alert, ScrollView, TextInput } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { BlurView } from 'expo-blur';
 import Button from '../../components/Button';
 import * as Contacts from 'expo-contacts';
@@ -279,7 +280,7 @@ const DataModal: React.FC<DataModalProps> = ({ visible, onClose }) => {
                     <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' }} />
                   </TouchableWithoutFeedback>
                   <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, maxHeight: height * 0.6, backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18 }}>
-                    <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12, textAlign: 'left' }}>Select Contact</Text>
+                    <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12, textAlign: 'left', fontFamily: fontConfig.heading }}>Select Contact</Text>
                     <Animated.ScrollView>
                       {contactsList.map((contact, idx) => (
                         <TouchableOpacity
@@ -412,6 +413,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     color: colors.text,
     textAlign: 'left',
+    fontFamily: fontConfig.heading,
   },
   label: {
     fontSize: 16,
@@ -480,6 +482,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: colors.text,
+    fontFamily: fontConfig.heading,
   },
   bundleDuration: {
     fontSize: 13,
@@ -490,6 +493,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: colors.primary,
+    fontFamily: fontConfig.heading,
   },
 });
 

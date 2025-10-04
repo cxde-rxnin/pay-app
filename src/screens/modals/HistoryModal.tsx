@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Modal, Animated, Dimensions, TouchableWithoutFeedback, TouchableOpacity, Keyboard, Platform } from 'react-native';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Picker } from '@react-native-picker/picker';
 
@@ -259,6 +260,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     color: colors.text,
     textAlign: 'left',
+    fontFamily: fontConfig.heading,
   },
   monthSelector: {
     borderWidth: 1,

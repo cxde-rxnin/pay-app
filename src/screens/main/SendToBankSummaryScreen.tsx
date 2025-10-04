@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { ArrowLeft, Bank } from 'iconsax-react-nativejs';
 import Button from '../../components/Button';
 
@@ -39,7 +40,7 @@ const SendToBankSummaryScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 16 }}>
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>
+        <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text, fontFamily: fontConfig.heading }}>
           Transaction Summary
         </Text>
       </View>
@@ -57,7 +58,7 @@ const SendToBankSummaryScreen: React.FC = () => {
             <Text style={{ fontSize: 14, color: colors.gray, marginBottom: 12 }}>
               You're sending
             </Text>
-            <Text style={{ fontSize: 48, fontWeight: '900', color: colors.text, marginBottom: 20 }}>
+            <Text style={{ fontSize: 48, fontWeight: '900', color: colors.text, marginBottom: 20, fontFamily: fontConfig.heading }}>
               ₦{parseInt(amount).toLocaleString()}
             </Text>
             

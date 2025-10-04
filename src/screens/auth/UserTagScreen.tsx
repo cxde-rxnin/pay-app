@@ -3,6 +3,7 @@ import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableWithout
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type AuthStackParamList = {
@@ -26,7 +27,7 @@ const UserTagScreen: React.FC<ScreenProps> = ({ navigation }) => {
         keyboardVerticalOffset={40}
       >
         <View style={{ flex: 1 }}>
-          <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5 }]}>Choose your @usertag</Text>
+          <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5, fontFamily: fontConfig.heading }]}>Choose your @usertag</Text>
           <Text style={[styles.subheading, { marginTop: 20, paddingHorizontal: 5 }]}>This is how friends can find you on PayApp</Text>
           <Text style={{ marginTop: 20, color: colors.primary }}>@usertag</Text>
           <TextInput

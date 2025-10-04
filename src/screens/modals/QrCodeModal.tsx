@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, Modal, Animated, Dimensions, TouchableWithoutFeedback, TouchableOpacity, Alert } from 'react-native';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Code, ScanBarcode } from 'iconsax-react-nativejs';
 import * as Sharing from 'expo-sharing';
@@ -158,7 +159,7 @@ const QrCodeModal: React.FC<QRCodeModalProps> = ({ visible, onClose, userTag = "
           backgroundColor={colors.white}
         />
       </View>
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 20, textAlign: 'center' }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 20, textAlign: 'center', fontFamily: fontConfig.heading }}>
           Your QR Code
         </Text>
       <View style={{
@@ -219,7 +220,7 @@ const QrCodeModal: React.FC<QRCodeModalProps> = ({ visible, onClose, userTag = "
           <View style={{ alignItems: 'center' }}>
             <Text style={{ color: 'red', marginBottom: 10 }}>No access to camera</Text>
             <TouchableOpacity onPress={requestPermission}>
-              <Text style={{ color: colors.primary, fontWeight: 'bold' }}>Grant Permission</Text>
+              <Text style={{ color: colors.primary, fontWeight: 'bold', fontFamily: fontConfig.heading }}>Grant Permission</Text>
             </TouchableOpacity>
           </View>
         ) : !scanned ? (
@@ -244,7 +245,7 @@ const QrCodeModal: React.FC<QRCodeModalProps> = ({ visible, onClose, userTag = "
               }} 
               style={{ marginTop: 16 }}
             >
-              <Text style={{ color: colors.primary, fontWeight: 'bold' }}>Scan Again</Text>
+              <Text style={{ color: colors.primary, fontWeight: 'bold', fontFamily: fontConfig.heading }}>Scan Again</Text>
             </TouchableOpacity>
           </View>
         )}

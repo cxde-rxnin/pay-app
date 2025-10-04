@@ -3,6 +3,7 @@ import { View, Text, TextInput, Platform, KeyboardAvoidingView, TouchableWithout
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type KYCStackParamList = {
@@ -28,7 +29,7 @@ const BVNVerificationScreen: React.FC<ScreenProps> = ({ navigation }) => {
         keyboardVerticalOffset={40}
       >
         <View style={{ flex: 1 }}>
-          <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5 }]}>Verify your identity</Text>
+          <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5, fontFamily: fontConfig.heading }]}>Verify your identity</Text>
           <Text style={[styles.subheading, { marginTop: 20, paddingHorizontal: 5 }]}>Enter your BVN to fetch your details securely</Text>
           <Text style={{ marginTop: 20, color: colors.primary }}>BVN</Text>
           <TextInput

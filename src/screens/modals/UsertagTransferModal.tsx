@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, StyleSheet, Modal, KeyboardAvoidingView, Platform, Animated, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import Button from '../../components/Button';
 import { useNavigation } from '@react-navigation/native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
@@ -234,6 +235,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     color: colors.text,
     textAlign: 'left',
+    fontFamily: fontConfig.heading,
   },
   label: {
     fontSize: 16,

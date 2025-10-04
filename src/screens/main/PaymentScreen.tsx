@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import Button from '../../components/Button';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Keypad from '../../components/Keypad';
@@ -127,7 +128,7 @@ const PaymentScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Enter Payment Pin</Text>
+      <Text style={[styles.title, { fontFamily: fontConfig.heading }]}>Enter Payment Pin</Text>
       <View style={styles.pinRow}>
         {[0, 1, 2, 3].map(i => (
           <View key={i} style={styles.pinDot}>

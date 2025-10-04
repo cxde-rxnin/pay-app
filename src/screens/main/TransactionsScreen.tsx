@@ -6,6 +6,7 @@ import { Call, Wifi, People, Bank, ArrowUp2, ArrowDown2 } from 'iconsax-react-na
 import styles from '../../theme/styles';
 import TransactionListItem from '../../components/TransactionListItem';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -205,7 +206,7 @@ const TransactionsScreen: React.FC<ScreenProps> = ({ navigation }) => {
     <View style={[screenStyles.container]}> 
       {/* Header */}
       <View style={screenStyles.header}>
-        <Text style={screenStyles.headerTitle}>Transactions</Text>
+        <Text style={[screenStyles.headerTitle, { fontFamily: fontConfig.heading }]}>Transactions</Text>
         <TouchableOpacity style={screenStyles.filterButton}>
           <Ionicons name="search" size={22} color={colors.text} />
         </TouchableOpacity>
@@ -303,6 +304,7 @@ const screenStyles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: colors.text,
+    fontFamily: fontConfig.heading,
   },
   filterButton: {
     padding: 6,

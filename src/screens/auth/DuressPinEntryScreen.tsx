@@ -3,6 +3,7 @@ import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableWithout
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type AuthStackParamList = {
@@ -47,7 +48,7 @@ const DuressPinEntryScreen: React.FC<ScreenProps> = ({ navigation }) => {
         keyboardVerticalOffset={40}
       >
         <View style={{ flex: 1 }}>
-          <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5 }]}>Set!your Duress PIN</Text>
+          <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5, fontFamily: fontConfig.heading }]}>Set your Duress PIN</Text>
           <Text style={[styles.subheading, { marginTop: 20, paddingHorizontal: 5 }]}>Enter a 6-digit PIN for emergencies.</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-start', marginTop: 32 }}>
             {pin.map((digit, idx) => (

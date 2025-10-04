@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
+import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Image } from 'react-native';
 
@@ -29,7 +30,7 @@ const WelcomeScreen: React.FC<ScreenProps> = ({ navigation }) => (
           resizeMode="contain"
         />
         <Text style={{ fontSize: 24, fontWeight: 'bold', 
-          marginBottom: 8 }}>Supercharge your payments ⚡</Text>
+          marginBottom: 8, fontFamily: fontConfig.heading }}>Supercharge your payments ⚡</Text>
         <Text style={{ fontSize: 16, marginBottom: 24, textAlign: 'left', color: '#222' }}>
           Create an account or sign in to continue.
         </Text>

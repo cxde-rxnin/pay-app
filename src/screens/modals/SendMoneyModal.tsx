@@ -3,6 +3,7 @@ import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated, Dimensions, 
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { BlurView } from 'expo-blur';
 import colors from '../../theme/colors';
+import { fontConfig } from '../../theme/fonts';
 import { User, Bank } from 'iconsax-react-nativejs';
 
 const { height } = Dimensions.get('window');
@@ -126,7 +127,7 @@ const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ visible, onClose, onSel
     <Modal visible={modalVisible} animationType="none" transparent onRequestClose={handleClose}>
       <TouchableWithoutFeedback onPress={handleClose}>
         <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-          <BlurView style={StyleSheet.absoluteFillObject} intensity={12} tint="dark" />
+          <BlurView style={StyleSheet.absoluteFillObject} intensity={20} tint="dark" />
         </Animated.View>
       </TouchableWithoutFeedback>
       <PanGestureHandler
@@ -201,6 +202,7 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginBottom: 18,
         textAlign: 'left',
+        fontFamily: fontConfig.heading,
     },
     option: {
         flexDirection: 'row',
@@ -217,6 +219,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         fontSize: 16,
         color: colors.text,
+        fontFamily: fontConfig.heading,
     },
     desc: {
         color: colors.gray,

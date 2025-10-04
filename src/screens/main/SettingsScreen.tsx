@@ -33,7 +33,11 @@ interface SettingItem {
   onPress: () => void;
 }
 
-const SettingsScreen = () => {
+interface SettingsScreenProps {
+  navigation: any;
+}
+
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -67,9 +71,9 @@ const SettingsScreen = () => {
     { 
       label: 'Account Verification', 
       icon: <SecurityUser size={22} color={colors.primary} variant="Bold" />,
-      badge: 'Tier 3',
-      badgeType: 'success',
-      onPress: () => Alert.alert('Account Verification', 'Your account is fully verified (Tier 3)')
+      badge: 'Tier 1',
+      badgeType: 'warning',
+      onPress: () => navigation.navigate('AccountVerification')
     },
   ];
 

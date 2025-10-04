@@ -28,6 +28,7 @@ const RootNavigator = () => (
       <RootStack.Screen name="SendToBank" component={SendToBankScreen} />
       <RootStack.Screen name="SendToBankSummary" component={SendToBankSummaryScreen} />
       <RootStack.Screen name="TransactionDetails" component={TransactionDetailsScreen} />
+      <RootStack.Screen name="AccountVerification" component={require('../screens/main/AccountVerificationScreen').default} />
       <RootStack.Screen name="TransactionResult" component={TransactionResultScreen} />
     </RootStack.Navigator>
   </NavigationContainer>

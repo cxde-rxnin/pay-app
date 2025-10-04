@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TextInput, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Alert, ActivityIndicator } from 'react-native';
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import colors from '../../theme/colors';
@@ -21,6 +21,27 @@ const field = { backgroundColor: '#F4F6FA', borderRadius: 12, paddingHorizontal:
 const BVNVerificationScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [bvn, setBvn] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleVerifyBVN = async () => {
+    if (bvn.length !== 11) {
+      Alert.alert('Invalid BVN', 'Please enter a valid 11-digit BVN');
+      return;
+    }
+
+    setLoading(true);
+    
+    // Simulate API call to verify BVN
+    setTimeout(() => {
+      setLoading(false);
+      Alert.alert(
+        'BVN Verified',
+        'Your BVN has been verified successfully. You are now Tier 1 (Basic) with a daily limit of ₦50,000',
+        [{ text: 'Continue', onPress: () => navigation.navigate('LoginPin') }]
+      );
+    }, 2000);
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView
@@ -29,27 +50,53 @@ const BVNVerificationScreen: React.FC<ScreenProps> = ({ navigation }) => {
         keyboardVerticalOffset={40}
       >
         <View style={{ flex: 1 }}>
-          <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5, fontFamily: fontConfig.heading }]}>Verify your identity</Text>
-          <Text style={[styles.subheading, { marginTop: 20, paddingHorizontal: 5 }]}>Enter your BVN to fetch your details securely</Text>
-          <Text style={{ marginTop: 20, color: colors.primary }}>BVN</Text>
+          <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5, fontFamily: fontConfig.heading }]}>
+            Verify your identity
+          </Text>
+          <Text style={[styles.subheading, { marginTop: 20, paddingHorizontal: 5 }]}>
+            Enter your BVN to fetch your details securely
+          </Text>
+          
+          <View style={{
+            backgroundColor: colors.primary + '10',
+            padding: 12,
+            borderRadius: 10,
+            marginTop: 16,
+            marginHorizontal: 5,
+          }}>
+            <Text style={{ fontSize: 12, color: colors.text, lineHeight: 18 }}>
+              🔒 Your BVN is secure and used only for identity verification. This completes Tier 1 verification (₦50,000/day limit).
+            </Text>
+          </View>
+
+          <Text style={{ marginTop: 24, color: colors.primary, paddingHorizontal: 5, fontWeight: '600' }}>
+            Bank Verification Number (BVN)
+          </Text>
           <TextInput
             style={[
               styles.body,
               field,
-              { marginTop: 8, borderColor: colors.accent, borderWidth: 1 },
+              { marginTop: 8, marginHorizontal: 5, borderColor: colors.accent, borderWidth: 1 },
               isFocused && { borderColor: colors.primary, borderWidth: 2 }
             ]}
-            placeholder="11-digit BVN"
+            placeholder="Enter 11-digit BVN"
+            placeholderTextColor={colors.gray + '60'}
             value={bvn}
             onChangeText={setBvn}
             keyboardType="number-pad"
             maxLength={11}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            editable={!loading}
           />
         </View>
         <View style={{ width: '100%', marginBottom: 30 }}>
-          <Button title="Confirm BVN" onPress={() => navigation.navigate('LoginPin')} style={{ width: '100%' }} />
+          <Button 
+            title={loading ? 'Verifying...' : 'Confirm BVN'} 
+            onPress={handleVerifyBVN} 
+            style={{ width: '100%' }} 
+            disabled={bvn.length !== 11 || loading}
+          />
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>

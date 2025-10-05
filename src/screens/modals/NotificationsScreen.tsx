@@ -23,182 +23,23 @@ import {
   Notification as NotificationIcon,
   Setting2
 } from 'iconsax-react-nativejs';
-
-interface Notification {
-  id: string;
-  type: 'transaction' | 'security' | 'promotional' | 'system';
-  title: string;
-  message: string;
-  timestamp: string;
-  date: string;
-  read: boolean;
-  icon?: 'success' | 'failed' | 'info' | 'gift' | 'sent' | 'received' | 'document' | 'security';
-  amount?: string;
-  actionable?: boolean;
-}
+import { useNotifications, StoredNotification } from '../../contexts/NotificationContext';
 
 interface NotificationsScreenProps {
   navigation: any;
 }
 
 const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ navigation }) => {
+  const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'read'>('all');
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'transaction',
-      title: 'Money Received',
-      message: 'You received ₦15,000 from @chukwudi',
-      timestamp: '2 min ago',
-      date: 'Today',
-      read: false,
-      icon: 'received',
-      amount: '+₦15,000'
-    },
-    {
-      id: '2',
-      type: 'transaction',
-      title: 'Transfer Successful',
-      message: 'Your transfer of ₦5,420 to Kunle Sayo (Access Bank) was successful',
-      timestamp: '1 hour ago',
-      date: 'Today',
-      read: false,
-      icon: 'success',
-      amount: '-₦5,420'
-    },
-    {
-      id: '3',
-      type: 'security',
-      title: 'New Login Detected',
-      message: 'A new login was detected on your account from Windows device in Lagos, Nigeria',
-      timestamp: '3 hours ago',
-      date: 'Today',
-      read: true,
-      icon: 'security',
-      actionable: true
-    },
-    {
-      id: '4',
-      type: 'promotional',
-      title: '🎉 Special Offer!',
-      message: 'Get 5% cashback on all airtime purchases this weekend. Limited time only!',
-      timestamp: '5 hours ago',
-      date: 'Today',
-      read: true,
-      icon: 'gift'
-    },
-    {
-      id: '5',
-      type: 'transaction',
-      title: 'Airtime Purchase',
-      message: 'You purchased ₦500 MTN airtime for 08012345678',
-      timestamp: '10:30 AM',
-      date: 'Today',
-      read: true,
-      icon: 'success',
-      amount: '-₦500'
-    },
-    {
-      id: '6',
-      type: 'system',
-      title: 'Account Verification',
-      message: 'Complete your Tier 2 verification to unlock ₦200,000 daily limit',
-      timestamp: '9:15 AM',
-      date: 'Today',
-      read: true,
-      icon: 'document',
-      actionable: true
-    },
-    {
-      id: '7',
-      type: 'transaction',
-      title: 'Transfer Failed',
-      message: 'Your transfer of ₦25,000 to 0123456789 (GTBank) failed due to insufficient funds',
-      timestamp: 'Yesterday',
-      date: 'Yesterday',
-      read: true,
-      icon: 'failed',
-      amount: '₦25,000'
-    },
-    {
-      id: '8',
-      type: 'transaction',
-      title: 'Money Sent',
-      message: 'You sent ₦3,000 to @tomiwa',
-      timestamp: 'Yesterday',
-      date: 'Yesterday',
-      read: true,
-      icon: 'sent',
-      amount: '-₦3,000'
-    },
-    {
-      id: '9',
-      type: 'security',
-      title: 'PIN Changed Successfully',
-      message: 'Your transaction PIN was changed successfully. If this wasn\'t you, contact support immediately.',
-      timestamp: 'Yesterday',
-      date: 'Yesterday',
-      read: true,
-      icon: 'security'
-    },
-    {
-      id: '10',
-      type: 'promotional',
-      title: 'Invite Friends, Earn Rewards',
-      message: 'Earn ₦1,000 for every friend who signs up using your referral code',
-      timestamp: '2 days ago',
-      date: 'Oct 2',
-      read: true,
-      icon: 'gift'
-    },
-    {
-      id: '11',
-      type: 'transaction',
-      title: 'Data Purchase',
-      message: 'You purchased 2GB MTN data bundle for 08012345678',
-      timestamp: '2 days ago',
-      date: 'Oct 2',
-      read: true,
-      icon: 'success',
-      amount: '-₦1,000'
-    },
-    {
-      id: '12',
-      type: 'system',
-      title: 'App Update Available',
-      message: 'Version 2.1.0 is now available with new features and performance improvements',
-      timestamp: '3 days ago',
-      date: 'Oct 1',
-      read: true,
-      icon: 'info'
-    }
-  ]);
 
   const onRefresh = () => {
     setRefreshing(true);
-    // Simulate API call
+    // Simulate API call - replace with actual API integration
     setTimeout(() => {
       setRefreshing(false);
     }, 1500);
-  };
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(notif => ({ ...notif, read: true }))
-    );
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
   };
 
   const getIcon = (iconType?: string) => {
@@ -252,7 +93,7 @@ const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ navigation })
     }
     groups[date].push(notification);
     return groups;
-  }, {} as Record<string, Notification[]>);
+  }, {} as Record<string, StoredNotification[]>);
 
   const unreadCount = notifications.filter(n => !n.read).length;
   const readCount = notifications.filter(n => n.read).length;
@@ -263,7 +104,7 @@ const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ navigation })
     { key: 'read', label: 'Read', count: readCount },
   ];
 
-  const handleNotificationPress = (notification: Notification) => {
+  const handleNotificationPress = (notification: StoredNotification) => {
     markAsRead(notification.id);
     
     if (notification.actionable) {

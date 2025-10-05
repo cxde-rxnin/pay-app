@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Image, StyleSheet, Share } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import colors from '../../theme/colors';
@@ -6,6 +6,8 @@ import Button from '../../components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import TransactionImage from '../../components/TransactionImage';
 import { captureRef } from 'react-native-view-shot';
+import { useNotifications } from '../../contexts/NotificationContext';
+import PushNotificationService from '../../services/pushNotificationService';
 
 const resultGifs: Record<string, any> = {
   success: require('../../assets/gifs/paid.gif'),
@@ -16,8 +18,109 @@ const resultGifs: Record<string, any> = {
 const TransactionResultScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const { addNotification } = useNotifications();
   // @ts-ignore
   const { status, message, transaction } = route.params || {};
+  
+  // Trigger notifications when transaction completes
+  useEffect(() => {
+    if (!transaction) return;
+
+    const now = new Date();
+    const timestamp = 'Just now';
+    const date = 'Today';
+
+    // Extract amount from transaction
+    const getAmount = () => {
+      if (transaction.price) return transaction.price; // Data bundle
+      if (transaction.amount) return transaction.amount;
+      return '₦0';
+    };
+
+    const amount = getAmount();
+    const cleanAmount = parseFloat(amount.replace('₦', '').replace(',', ''));
+
+    // Determine notification details based on transaction type
+    let notificationTitle = '';
+    let notificationMessage = '';
+    let notificationType: 'success' | 'failed' = status === 'success' ? 'success' : 'failed';
+    let icon: 'success' | 'failed' | 'sent' = notificationType;
+
+    if (transaction.type === 'Airtime') {
+      if (status === 'success') {
+        notificationTitle = 'Airtime Purchase Successful';
+        notificationMessage = `You purchased ${amount} ${transaction.network} airtime for ${transaction.contact}`;
+      } else {
+        notificationTitle = 'Airtime Purchase Failed';
+        notificationMessage = `Failed to purchase ${amount} ${transaction.network} airtime for ${transaction.contact}`;
+      }
+      icon = notificationType;
+    } else if (transaction.type === 'Data') {
+      if (status === 'success') {
+        notificationTitle = 'Data Purchase Successful';
+        notificationMessage = `You purchased ${transaction.bundle} ${transaction.network} data for ${transaction.contact}`;
+      } else {
+        notificationTitle = 'Data Purchase Failed';
+        notificationMessage = `Failed to purchase ${transaction.bundle} ${transaction.network} data for ${transaction.contact}`;
+      }
+      icon = notificationType;
+    } else if (transaction.type === 'Internal Transfer') {
+      if (status === 'success') {
+        notificationTitle = 'Money Sent';
+        const recipient = transaction.usertag || transaction.accountName || 'recipient';
+        notificationMessage = `You sent ${amount} to ${recipient}`;
+        icon = 'sent';
+      } else {
+        notificationTitle = 'Transfer Failed';
+        notificationMessage = `Failed to send ${amount}. ${message}`;
+        icon = 'failed';
+      }
+    } else if (transaction.type === 'Bank Transfer') {
+      if (status === 'success') {
+        notificationTitle = 'Transfer Successful';
+        notificationMessage = `Your transfer of ${amount} to ${transaction.accountName} (${transaction.bankName}) was successful`;
+        icon = 'sent';
+      } else {
+        notificationTitle = 'Transfer Failed';
+        notificationMessage = `Transfer of ${amount} to ${transaction.accountName} failed. ${message}`;
+        icon = 'failed';
+      }
+    }
+
+    // Add to notification center (no toast)
+    addNotification({
+      type: 'transaction',
+      title: notificationTitle,
+      message: notificationMessage,
+      timestamp,
+      date,
+      read: false,
+      icon,
+      amount: status === 'success' ? `-${amount}` : amount,
+    });
+
+    // Send push notification (will be delivered even when app is closed)
+    const pushNotificationType = 
+      transaction.type === 'Internal Transfer' || transaction.type === 'Bank Transfer'
+        ? (status === 'success' ? 'sent' : 'failed')
+        : (status === 'success' ? 'success' : 'failed');
+    
+    console.log('🔔 Sending push notification:', {
+      type: pushNotificationType,
+      amount: cleanAmount,
+      message: notificationMessage
+    });
+    
+    PushNotificationService.sendTransactionNotification(
+      pushNotificationType as 'sent' | 'received' | 'success' | 'failed',
+      cleanAmount,
+      notificationMessage
+    ).then(() => {
+      console.log('✅ Push notification scheduled successfully');
+    }).catch((error) => {
+      console.error('❌ Push notification error:', error);
+    });
+  }, [transaction, status, message, addNotification]);
   
   // Use sent.gif for internal transfers and bank transfers, paid.gif for other successful transactions
   const getGif = () => {

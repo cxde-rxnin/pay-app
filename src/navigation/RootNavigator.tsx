@@ -11,11 +11,12 @@ import SendToLemoSummaryScreen from '../screens/main/SendToLemoSummaryScreen';
 import SendToBankScreen from '../screens/main/SendToBankScreen';
 import SendToBankSummaryScreen from '../screens/main/SendToBankSummaryScreen';
 import TransactionDetailsScreen from '../screens/modals/TransactionDetailsScreen';
+import { navigationRef } from '../services/navigationService';
 
 const RootStack = createStackNavigator();
 
 const RootNavigator = () => (
-  <NavigationContainer>
+  <NavigationContainer ref={navigationRef}>
     <RootStack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
       <RootStack.Screen name="Auth" component={AuthStack} />
       <RootStack.Screen name="KYC" component={KYCStack} />

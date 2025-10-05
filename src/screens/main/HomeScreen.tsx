@@ -18,6 +18,7 @@ import UsertagTransferModal from '../modals/UsertagTransferModal';
 import HistoryModal from '../modals/HistoryModal';
 import SendToLemoModal from '../modals/SendToLemoModal';
 import QrCodeModal from '../modals/QrCodeModal';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 type RootStackParamList = {
   Auth: undefined;
@@ -45,6 +46,7 @@ type ScreenProps = {
 };
 
 const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
+  const { unreadCount } = useNotifications();
   const [showAddMoney, setShowAddMoney] = useState(false);
   const [showSendMoney, setShowSendMoney] = useState(false);
   const [showAirtimeModal, setShowAirtimeModal] = useState(false);
@@ -54,9 +56,6 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [showSendToLemoModal, setShowSendToLemoModal] = useState(false);
   const [showQrCodeModal, setShowQrCodeModal] = useState(false);
   const user = { name: 'Obed', accountNumber: '1234567890', bankName: 'Lemo Bank' };
-  
-  // Simulated unread notification count - replace with actual data from state/API
-  const unreadNotificationCount = 3;
 
   const handleSendMoneySelect = (option: 'lemo' | 'bank') => {
     setShowSendMoney(false);
@@ -97,7 +96,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
               color={colors.primary}
               variant="Outline"
             />
-            {unreadNotificationCount > 0 && (
+            {unreadCount > 0 && (
               <View style={{
                 position: 'absolute',
                 top: -4,
@@ -117,7 +116,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
                   fontSize: 11,
                   fontWeight: '700',
                 }}>
-                  {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </Text>
               </View>
             )}

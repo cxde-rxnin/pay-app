@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "PayApp",
-    "slug": "frontend",
+    "slug": "payapp-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
@@ -11,6 +11,12 @@
       "image": "./src/assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
+    },
+    "notification": {
+      "icon": "./src/assets/icon.png",
+      "color": "#1877F2",
+      "androidMode": "default",
+      "iosDisplayInForeground": true
     },
     "plugins": [
       [
@@ -27,7 +33,12 @@
       ]
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
     },
     "android": {
       "package": "com.payapp.frontend",
@@ -36,10 +47,22 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.READ_CONTACTS",
+        "android.permission.WRITE_CONTACTS",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cecdda49-f61d-4b29-9336-c556f6d90f1b"
+      }
+    },
+    "owner": "obxd01"
   }
 }

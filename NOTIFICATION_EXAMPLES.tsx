@@ -1,7 +1,7 @@
 // Example: How to use the notification system in your app
 
 import React, { useEffect } from 'react';
-import { View, Button, Text } from 'react-native';
+import { View, Button } from 'react-native';
 import { useNotifications } from './src/contexts/NotificationContext';
 import NotificationService from './src/services/notificationService';
 

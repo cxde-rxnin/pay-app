@@ -9,35 +9,22 @@ import NotificationContainer from './src/components/NotificationContainer';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 
 function AppContent() {
-  const { pushToken, permissionStatus, registerForPushNotifications } = usePushNotifications();
+  const { pushToken, registerForPushNotifications } = usePushNotifications();
 
   useEffect(() => {
     // Register for push notifications on app start
     registerForPushNotifications();
-  }, [registerForPushNotifications]);
-
-  useEffect(() => {
-    // Log permission and token status
-    console.log('📱 Push Notification Status:', {
-      permission: permissionStatus,
-      hasToken: !!pushToken,
-      token: pushToken
-    });
-
-    if (permissionStatus === 'denied') {
-      console.warn('⚠️ Push notifications are DENIED. Please enable in Settings.');
-    }
 
     // Log the token (in production, send this to your backend)
     if (pushToken) {
-      console.log('✅ Push Token Ready:', pushToken);
+      console.log('Push notification token:', pushToken);
       // TODO: Send token to your backend
       // await fetch('https://your-api.com/register-device', {
       //   method: 'POST',
       //   body: JSON.stringify({ token: pushToken, userId: currentUserId })
       // });
     }
-  }, [pushToken, permissionStatus]);
+  }, [pushToken, registerForPushNotifications]);
 
   return (
     <>

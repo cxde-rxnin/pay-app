@@ -44,45 +44,31 @@ export class PushNotificationService {
    */
   async registerForPushNotifications(): Promise<PushNotificationToken | null> {
     try {
-      console.log('🔧 Starting push notification registration...');
-      
       // Check if running on physical device
       if (!Device.isDevice) {
-        console.log('❌ Push notifications only work on physical devices');
-        console.log('📱 Device.isDevice:', Device.isDevice);
+        console.log('Push notifications only work on physical devices');
         return null;
       }
-      console.log('✅ Running on physical device');
 
       // Request permissions
-      console.log('🔐 Checking notification permissions...');
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      console.log('📋 Existing permission status:', existingStatus);
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
-        console.log('🙏 Requesting notification permissions...');
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
-        console.log('📋 New permission status:', finalStatus);
       }
 
       if (finalStatus !== 'granted') {
-        console.log('❌ Failed to get push notification permissions');
-        console.log('💡 Go to Settings > Expo Go > Notifications and enable them');
+        console.log('Failed to get push notification permissions');
         return null;
       }
-      console.log('✅ Notification permissions granted');
 
-      // Get push token
-      console.log('🎫 Getting Expo push token...');
-      
-      // For Expo Go, we don't need to pass projectId - it uses the experience ID automatically
+      // Get push token (Expo Go handles projectId automatically)
       const tokenData = await Notifications.getExpoPushTokenAsync();
 
       this.pushToken = tokenData.data;
-      console.log('✅ Push Token Generated:', this.pushToken);
-      console.log('📱 Token Type:', tokenData.type);
+      console.log('✅ Push Token:', this.pushToken);
 
       // Configure notification channel for Android
       if (Platform.OS === 'android') {
@@ -181,14 +167,7 @@ export class PushNotificationService {
     seconds?: number
   ) {
     try {
-      console.log('📲 Scheduling notification:', {
-        title,
-        body: body.substring(0, 50) + '...',
-        delay: seconds ? `${seconds}s` : 'immediate',
-        hasData: !!data
-      });
-
-      const identifier = await Notifications.scheduleNotificationAsync({
+      await Notifications.scheduleNotificationAsync({
         content: {
           title,
           body,
@@ -196,17 +175,10 @@ export class PushNotificationService {
           sound: 'default',
           badge: 1,
         },
-        trigger: {
-          seconds: seconds || 1, // Use 1 second as minimum for iOS to show outside app
-          repeats: false,
-        } as any
+        trigger: seconds ? ({ seconds } as any) : null, // null = immediate
       });
-
-      console.log('✅ Notification scheduled with ID:', identifier);
-      return identifier;
     } catch (error) {
-      console.error('❌ Error scheduling notification:', error);
-      throw error;
+      console.error('Error scheduling local notification:', error);
     }
   }
 
@@ -233,12 +205,6 @@ export class PushNotificationService {
       failed: '❌',
     };
 
-    console.log(`📢 Sending ${type} transaction notification:`, {
-      title: `${emojis[type]} ${titles[type]}`,
-      amount,
-      details: details.substring(0, 50) + '...'
-    });
-
     await this.scheduleLocalNotification(
       `${emojis[type]} ${titles[type]}`,
       details,
@@ -252,8 +218,6 @@ export class PushNotificationService {
       },
       2 // 2 seconds delay to avoid overlapping with in-app toast
     );
-
-    console.log('✅ Transaction notification scheduled successfully');
   }
 
   /**

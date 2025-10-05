@@ -54,6 +54,9 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [showSendToLemoModal, setShowSendToLemoModal] = useState(false);
   const [showQrCodeModal, setShowQrCodeModal] = useState(false);
   const user = { name: 'Obed', accountNumber: '1234567890', bankName: 'Lemo Bank' };
+  
+  // Simulated unread notification count - replace with actual data from state/API
+  const unreadNotificationCount = 3;
 
   const handleSendMoneySelect = (option: 'lemo' | 'bank') => {
     setShowSendMoney(false);
@@ -85,13 +88,40 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
       <View style={{ paddingHorizontal: 20, paddingTop: 32 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, paddingTop: 40 }}>
           <Text style={{ fontSize: 24, color: colors.text, fontWeight: '900', fontFamily: fontConfig.heading }}>Hello, Obed</Text>
-          <Notification
-            size={26}
-            color={colors.primary}
-            variant="Outline"
-            style={{ marginLeft: 8 }}
+          <TouchableOpacity 
             onPress={() => navigation.navigate('Modals', { screen: 'Notifications' })}
-          />
+            style={{ position: 'relative', marginLeft: 8 }}
+          >
+            <Notification
+              size={26}
+              color={colors.primary}
+              variant="Outline"
+            />
+            {unreadNotificationCount > 0 && (
+              <View style={{
+                position: 'absolute',
+                top: -4,
+                right: -4,
+                backgroundColor: '#FF3B30',
+                borderRadius: 10,
+                minWidth: 20,
+                height: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingHorizontal: 5,
+                borderWidth: 2,
+                borderColor: colors.white,
+              }}>
+                <Text style={{
+                  color: colors.white,
+                  fontSize: 11,
+                  fontWeight: '700',
+                }}>
+                  {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
         <View style={{ marginBottom: 18 }}>
           <BalanceCard balance={100000} currency="NGN" />

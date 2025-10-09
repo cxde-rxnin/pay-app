@@ -97,8 +97,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           text: 'Log Out', 
           style: 'destructive',
           onPress: () => {
-            // TODO: Clear user session and navigate to auth
-            Alert.alert('Logged Out', 'You have been logged out successfully');
+            // Clear user session and reset navigation stack to onboarding
+            (navigation as any).reset({
+              index: 0,
+              routes: [{ name: 'Auth', params: { screen: 'Onboarding' } }],
+            });
           }
         }
       ]

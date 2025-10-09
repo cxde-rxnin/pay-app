@@ -88,15 +88,33 @@ export class NotificationService {
    * Check if notification should be sent based on type and preferences
    */
   private shouldSendNotificationForType(payload: NotificationPayload): boolean {
-    if (!this.preferences) return true; // If no preferences set, send all notifications
+    if (!this.preferences) {
+      console.log('📝 No preferences set, allowing notification');
+      return true; // If no preferences set, send all notifications
+    }
 
     const transactionSubType = payload.data?.subType;
-    return shouldSendNotification(
+    console.log('🔍 Checking notification preferences:', {
+      type: payload.type,
+      subType: transactionSubType,
+      preferences: {
+        pushEnabled: this.preferences.pushEnabled,
+        transactionAlerts: this.preferences.transactionAlerts,
+        sentTransactionAlerts: this.preferences.sentTransactionAlerts,
+        receivedTransactionAlerts: this.preferences.receivedTransactionAlerts,
+        failedTransactionAlerts: this.preferences.failedTransactionAlerts,
+      }
+    });
+
+    const result = shouldSendNotification(
       this.preferences,
       payload.type,
       'push', // Default to push notifications
       transactionSubType
     );
+
+    console.log('✅ Notification decision:', result ? 'ALLOWED' : 'BLOCKED');
+    return result;
   }
 
   /**

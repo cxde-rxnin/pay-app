@@ -3,14 +3,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from '../screens/auth/SplashScreen';
 import OnboardingScreen from '../screens/auth/OnboardingScreen';
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
+import WelcomeBackScreen from '../screens/auth/WelcomeBackScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
 import OTPScreen from '../screens/auth/OTPScreen';
 import PinSetupScreen from '../screens/auth/PinSetupScreen';
 import UserTagScreen from '../screens/auth/UserTagScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import LoginPinScreen from '../screens/auth/LoginPinScreen';
-import TransactionPinScreen from '../screens/auth/TransactionPinScreen';
-import DuressPinScreen from '../screens/auth/DuressPinScreen';
 
 const Stack = createStackNavigator();
 
@@ -19,6 +18,7 @@ const AuthStack = () => (
     <Stack.Screen name="Splash" component={SplashScreen} />
     <Stack.Screen name="Onboarding" component={OnboardingScreen} />
     <Stack.Screen name="Welcome" component={WelcomeScreen} />
+    <Stack.Screen name="WelcomeBack" component={WelcomeBackScreen} />
     <Stack.Screen name="Signup" component={SignupScreen} />
     <Stack.Screen name="OTP" component={OTPScreen} />
     <Stack.Screen name="LoginPin" component={LoginPinScreen} />

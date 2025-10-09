@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NotificationService } from '../services/notificationService';
 
 export interface NotificationPreferences {
   // Channels
@@ -73,6 +74,12 @@ export const NotificationPreferencesProvider: React.FC<NotificationPreferencesPr
   useEffect(() => {
     loadPreferences();
   }, []);
+
+  // Sync preferences with NotificationService whenever they change
+  useEffect(() => {
+    console.log('🔄 Syncing preferences with NotificationService:', preferences);
+    NotificationService.getInstance().setPreferences(preferences);
+  }, [preferences]);
 
   const loadPreferences = async () => {
     try {

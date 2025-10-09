@@ -1,13 +1,15 @@
 import React from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Image } from 'react-native';
+import AuthStorageService from '../../services/authStorageService';
 
 type AuthStackParamList = {
   Welcome: undefined;
+  WelcomeBack: undefined;
   Signup: undefined;
   Login: undefined;
 };

@@ -7,7 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import TransactionImage from '../../components/TransactionImage';
 import { captureRef } from 'react-native-view-shot';
 import { useNotifications } from '../../contexts/NotificationContext';
+import { useNotificationPreferences } from '../../contexts/NotificationPreferencesContext';
 import PushNotificationService from '../../services/pushNotificationService';
+import NotificationService from '../../services/notificationService';
 
 const resultGifs: Record<string, any> = {
   success: require('../../assets/gifs/paid.gif'),
@@ -19,6 +21,7 @@ const TransactionResultScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { showNotification, addNotification } = useNotifications();
+  const { preferences } = useNotificationPreferences();
   // @ts-ignore
   const { status, message, transaction } = route.params || {};
   
@@ -87,6 +90,12 @@ const TransactionResultScreen: React.FC = () => {
       }
     }
 
+    // Check if transaction notifications are enabled
+    if (!preferences.transactionAlerts) {
+      console.log('🔕 Transaction notifications are disabled by user');
+      return;
+    }
+
     // Show toast notification
     showNotification({
       type: notificationType === 'success' ? 'success' : 'error',
@@ -107,34 +116,20 @@ const TransactionResultScreen: React.FC = () => {
       amount: status === 'success' ? `-${amount}` : amount,
     });
 
-    // Send push notification (will be delivered even when app is closed)
-    const pushNotificationType = 
+    // Use NotificationService to trigger notifications (respects preferences)
+    const transactionType: 'sent' | 'received' | 'failed' | 'success' = 
       transaction.type === 'Internal Transfer' || transaction.type === 'Bank Transfer'
         ? (status === 'success' ? 'sent' : 'failed')
         : (status === 'success' ? 'success' : 'failed');
-    
-    console.log('🔔 Sending push notification:', {
-      type: pushNotificationType,
+
+    NotificationService.notifyTransaction({
+      type: transactionType,
       amount: cleanAmount,
-      message: notificationMessage
+      recipient: transaction.accountName || transaction.phoneNumber,
+      description: notificationMessage,
     });
 
-    // Send push notification asynchronously
-    const sendPushNotification = async () => {
-      try {
-        await PushNotificationService.sendTransactionNotification(
-          pushNotificationType as 'sent' | 'received' | 'success' | 'failed',
-          cleanAmount,
-          notificationMessage
-        );
-      } catch (pushError) {
-        console.log('⚠️ Push notification failed (app continues normally):', pushError);
-        // Transaction notification still saved locally and in notification center
-      }
-    };
-
-    sendPushNotification();
-  }, [transaction, status, message, showNotification, addNotification]);
+  }, [transaction, status, message, showNotification, addNotification, preferences]);
   
   // Use sent.gif for internal transfers and bank transfers, paid.gif for other successful transactions
   const getGif = () => {

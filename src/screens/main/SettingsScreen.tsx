@@ -4,6 +4,9 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { BlurView } from 'expo-blur';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
+import { useNotificationPreferences } from '../../contexts/NotificationPreferencesContext';
+import { useNotifications } from '../../contexts/NotificationContext';
+import { useBiometricAuth } from '../../hooks/useBiometricAuth';
 import { 
   Profile, 
   SecurityUser, 
@@ -26,6 +29,7 @@ const { height } = Dimensions.get('window');
 
 interface SettingItem {
   label: string;
+  subtitle?: string;
   icon: React.ReactNode;
   badge?: string;
   badgeType?: 'success' | 'warning' | 'info';
@@ -39,10 +43,49 @@ interface SettingsScreenProps {
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+
+  // Biometric auth hook
+  const {
+    isEnabled: biometricEnabled,
+    isAvailable: biometricAvailable,
+    biometricNames,
+    isLoading: biometricLoading,
+    enableBiometric,
+    disableBiometric,
+  } = useBiometricAuth();
+
+  const handleBiometricToggle = async () => {
+    if (!biometricAvailable) {
+      const biometricName = biometricNames.length > 0 ? biometricNames.join(' or ') : 'Biometric authentication';
+      Alert.alert(
+        'Not Available',
+        `${biometricName} is not available on this device or not set up. Please ensure you have enrolled biometric authentication in your device settings.`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    if (biometricLoading) return;
+
+    try {
+      if (biometricEnabled) {
+        const result = await disableBiometric();
+        if (!result.success) {
+          Alert.alert('Error', result.error || 'Failed to disable biometric authentication');
+        }
+      } else {
+        const result = await enableBiometric();
+        if (!result.success) {
+          Alert.alert('Error', result.error || 'Failed to enable biometric authentication');
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred');
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -85,8 +128,13 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
     },
     { 
       label: 'Biometric Authentication', 
+      subtitle: !biometricAvailable 
+        ? 'Not available on this device'
+        : biometricNames.length > 0 
+          ? `Using ${biometricNames.join(', ')}`
+          : 'Available',
       icon: <FingerScan size={22} color={colors.primary} variant="Bold" />,
-      onPress: () => setBiometricEnabled(!biometricEnabled)
+      onPress: handleBiometricToggle
     },
   ];
 
@@ -95,11 +143,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       label: 'Notifications', 
       icon: <Notification size={22} color={colors.primary} variant="Bold" />,
       onPress: () => setShowNotificationModal(true)
-    },
-    { 
-      label: 'Appearance', 
-      icon: <Brush size={22} color={colors.primary} variant="Bold" />,
-      onPress: () => Alert.alert('Appearance', 'Theme customization coming soon!')
     },
   ];
 
@@ -131,12 +174,19 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       <View style={settingsStyles.settingIcon}>
         {item.icon}
       </View>
-      <Text style={[
-        settingsStyles.settingLabel, 
-        item.danger && { color: colors.error }
-      ]}>
-        {item.label}
-      </Text>
+      <View style={settingsStyles.settingContent}>
+        <Text style={[
+          settingsStyles.settingLabel, 
+          item.danger && { color: colors.error }
+        ]}>
+          {item.label}
+        </Text>
+        {item.subtitle && (
+          <Text style={settingsStyles.settingSubtitle}>
+            {item.subtitle}
+          </Text>
+        )}
+      </View>
       {item.badge && (
         <View style={[
           settingsStyles.badge,
@@ -156,7 +206,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       {item.label === 'Biometric Authentication' ? (
         <Switch
           value={biometricEnabled}
-          onValueChange={setBiometricEnabled}
+          onValueChange={handleBiometricToggle}
+          disabled={biometricLoading || !biometricAvailable}
           trackColor={{ false: colors.gray + '40', true: colors.primary + '40' }}
           thumbColor={biometricEnabled ? colors.primary : '#f4f3f4'}
         />
@@ -566,10 +617,24 @@ const NotificationModal: React.FC<{
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const translateY = React.useRef(new Animated.Value(0)).current;
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [pushEnabled, setPushEnabled] = React.useState(true);
-  const [emailEnabled, setEmailEnabled] = React.useState(true);
-  const [smsEnabled, setSmsEnabled] = React.useState(false);
-  const [transactionAlerts, setTransactionAlerts] = React.useState(true);
+  
+  const { preferences, updatePreference, isLoading } = useNotificationPreferences();
+  const { showNotification } = useNotifications();
+  
+  // Enhanced update function with feedback
+  const handlePreferenceUpdate = async (key: keyof typeof preferences, value: boolean) => {
+    await updatePreference(key, value);
+    
+    // Show feedback for important changes
+    if (key === 'pushEnabled') {
+      showNotification({
+        type: value ? 'success' : 'warning',
+        title: 'Push Notifications',
+        message: value ? 'Push notifications enabled' : 'Push notifications disabled',
+        duration: 3000,
+      });
+    }
+  };
 
   const handleClose = () => {
     Animated.parallel([
@@ -667,35 +732,41 @@ const NotificationModal: React.FC<{
           <View style={modalStyles.dragIndicator} />
           <Text style={modalStyles.heading}>Notification Settings</Text>
           
-          <Text style={modalStyles.sectionLabel}>Channels</Text>
+          {isLoading ? (
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <Text style={{ color: colors.gray }}>Loading preferences...</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={modalStyles.sectionLabel}>Channels</Text>
           
           <View style={modalStyles.toggleRow}>
             <Text style={modalStyles.toggleLabel}>Push Notifications</Text>
             <Switch
-              value={pushEnabled}
-              onValueChange={setPushEnabled}
+              value={preferences.pushEnabled}
+              onValueChange={(value) => handlePreferenceUpdate('pushEnabled', value)}
               trackColor={{ false: colors.gray + '40', true: colors.primary + '40' }}
-              thumbColor={pushEnabled ? colors.primary : '#f4f3f4'}
+              thumbColor={preferences.pushEnabled ? colors.primary : '#f4f3f4'}
             />
           </View>
 
           <View style={modalStyles.toggleRow}>
             <Text style={modalStyles.toggleLabel}>Email Notifications</Text>
             <Switch
-              value={emailEnabled}
-              onValueChange={setEmailEnabled}
+              value={preferences.emailEnabled}
+              onValueChange={(value) => updatePreference('emailEnabled', value)}
               trackColor={{ false: colors.gray + '40', true: colors.primary + '40' }}
-              thumbColor={emailEnabled ? colors.primary : '#f4f3f4'}
+              thumbColor={preferences.emailEnabled ? colors.primary : '#f4f3f4'}
             />
           </View>
 
           <View style={modalStyles.toggleRow}>
             <Text style={modalStyles.toggleLabel}>SMS Notifications</Text>
             <Switch
-              value={smsEnabled}
-              onValueChange={setSmsEnabled}
+              value={preferences.smsEnabled}
+              onValueChange={(value) => updatePreference('smsEnabled', value)}
               trackColor={{ false: colors.gray + '40', true: colors.primary + '40' }}
-              thumbColor={smsEnabled ? colors.primary : '#f4f3f4'}
+              thumbColor={preferences.smsEnabled ? colors.primary : '#f4f3f4'}
             />
           </View>
           
@@ -704,33 +775,44 @@ const NotificationModal: React.FC<{
           <View style={modalStyles.toggleRow}>
             <Text style={modalStyles.toggleLabel}>Transaction Alerts</Text>
             <Switch
-              value={transactionAlerts}
-              onValueChange={setTransactionAlerts}
+              value={preferences.transactionAlerts}
+              onValueChange={(value) => updatePreference('transactionAlerts', value)}
               trackColor={{ false: colors.gray + '40', true: colors.primary + '40' }}
-              thumbColor={transactionAlerts ? colors.primary : '#f4f3f4'}
+              thumbColor={preferences.transactionAlerts ? colors.primary : '#f4f3f4'}
             />
           </View>
 
           <View style={modalStyles.toggleRow}>
             <Text style={modalStyles.toggleLabel}>Security Alerts</Text>
             <Switch
-              value={true}
-              onValueChange={() => {}}
-              disabled={true}
+              value={preferences.securityAlerts}
+              onValueChange={(value) => updatePreference('securityAlerts', value)}
               trackColor={{ false: colors.gray + '40', true: colors.primary + '40' }}
-              thumbColor={colors.primary}
+              thumbColor={preferences.securityAlerts ? colors.primary : '#f4f3f4'}
+            />
+          </View>
+
+          <View style={modalStyles.toggleRow}>
+            <Text style={modalStyles.toggleLabel}>System Alerts</Text>
+            <Switch
+              value={preferences.systemAlerts}
+              onValueChange={(value) => updatePreference('systemAlerts', value)}
+              trackColor={{ false: colors.gray + '40', true: colors.primary + '40' }}
+              thumbColor={preferences.systemAlerts ? colors.primary : '#f4f3f4'}
             />
           </View>
 
           <View style={modalStyles.toggleRow}>
             <Text style={modalStyles.toggleLabel}>Promotional Updates</Text>
             <Switch
-              value={false}
-              onValueChange={() => Alert.alert('Promotional Updates', 'Enable promotional updates?')}
+              value={preferences.promotionalUpdates}
+              onValueChange={(value) => updatePreference('promotionalUpdates', value)}
               trackColor={{ false: colors.gray + '40', true: colors.primary + '40' }}
-              thumbColor={'#f4f3f4'}
+              thumbColor={preferences.promotionalUpdates ? colors.primary : '#f4f3f4'}
             />
           </View>
+            </>
+          )}
         </Animated.View>
       </PanGestureHandler>
     </Modal>
@@ -847,11 +929,19 @@ const settingsStyles = StyleSheet.create({
   settingIcon: {
     marginRight: 14,
   },
-  settingLabel: {
+  settingContent: {
     flex: 1,
+  },
+  settingLabel: {
     fontSize: 15,
     fontWeight: '500',
     color: colors.text,
+  },
+  settingSubtitle: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: colors.gray,
+    marginTop: 2,
   },
   badge: {
     paddingHorizontal: 10,

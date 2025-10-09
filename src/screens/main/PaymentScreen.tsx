@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
 import Button from '../../components/Button';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Keypad from '../../components/Keypad';
+import { useBiometricAuth } from '../../hooks/useBiometricAuth';
 
 const PaymentScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -15,120 +16,175 @@ const PaymentScreen: React.FC = () => {
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Biometric authentication
+  const { 
+    isEnabledForTransactions, 
+    authenticateTransaction, 
+    isAvailable, 
+    isEnabled,
+    enableBiometric 
+  } = useBiometricAuth();
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🔐 Biometric Debug in PaymentScreen:', {
+      isAvailable,
+      isEnabled,
+      isEnabledForTransactions,
+      showBiometric: isEnabledForTransactions
+    });
+  }, [isAvailable, isEnabled, isEnabledForTransactions]);
+
   const handleKeyPress = (digit: string) => {
     if (pin.length < 4) setPin(pin + digit);
   };
+  
   const handleDelete = () => {
     setPin(pin.slice(0, -1));
   };
 
+  const handleBiometricAuth = async () => {
+    try {
+      const transactionType = type || 'transaction';
+      const transactionAmount = amount || price;
+      
+      const result = await authenticateTransaction(
+        transactionType,
+        transactionAmount ? `₦${transactionAmount}` : undefined
+      );
+      
+      if (result.success) {
+        // Bypass PIN entry and proceed with transaction
+        processTransaction();
+      } else {
+        Alert.alert(
+          'Authentication Failed',
+          result.error || 'Biometric authentication failed. Please try again or enter your PIN.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Biometric authentication error:', error);
+      Alert.alert(
+        'Error',
+        'An error occurred during biometric authentication. Please enter your PIN.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  const processTransaction = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      // Simulate transaction result
+      const isSuccess = pin === '' ? true : pin !== '0000'; // Biometric auth always succeeds, PIN 0000 fails
+      const now = new Date();
+      let transactionObj;
+        
+      if (type === 'Data') {
+        // Data transaction
+        transactionObj = {
+          type: 'Data',
+          network,
+          contact,
+          bundle,
+          price,
+          amount: price,
+          date: now.toISOString().slice(0, 10),
+          time: now.toTimeString().slice(0, 5),
+          sender: 'Obed Ihekaike',
+          receiver: contact,
+          phone: contact,
+          sessionId: 'DATA' + now.getTime(),
+          bankName: network,
+          status: isSuccess ? 'success' : 'error',
+        };
+      } else if (type === 'internal') {
+        // Internal transfer (usertag or account)
+        const recipient = usertag || accountName || 'Unknown';
+        transactionObj = {
+          type: 'Internal Transfer',
+          amount,
+          date: now.toISOString().slice(0, 10),
+          time: now.toTimeString().slice(0, 5),
+          sender: 'Obed Ihekaike',
+          receiver: recipient,
+          usertag,
+          accountNumber,
+          accountName,
+          sessionId: 'INT' + now.getTime(),
+          bankName: 'Payyy',
+          status: isSuccess ? 'success' : 'error',
+        };
+      } else if (type === 'bank') {
+        // Bank transfer
+        transactionObj = {
+          type: 'Bank Transfer',
+          amount,
+          fee: '₦10',
+          total: `₦${(parseFloat(amount.replace('₦', '').replace(',', '')) + 10).toLocaleString()}`,
+          date: now.toISOString().slice(0, 10),
+          time: now.toTimeString().slice(0, 5),
+          sender: 'Obed Ihekaike',
+          receiver: accountName,
+          accountNumber,
+          accountName,
+          bankName,
+          sessionId: 'BANK' + now.getTime(),
+          status: isSuccess ? 'success' : 'error',
+        };
+      } else {
+        // Airtime transaction
+        transactionObj = {
+          type: 'Airtime',
+          network,
+          contact,
+          amount,
+          date: now.toISOString().slice(0, 10),
+          time: now.toTimeString().slice(0, 5),
+          sender: 'Obed Ihekaike',
+          receiver: contact,
+          phone: contact,
+          sessionId: 'AIRTIME' + now.getTime(),
+          bankName: network,
+          status: isSuccess ? 'success' : 'error',
+        };
+      }
+
+      // Create appropriate success message
+      let successMessage = '';
+      if (type === 'Data') {
+        successMessage = `${bundle} sent to ${contact}`;
+      } else if (type === 'internal') {
+        const recipient = usertag || accountName || contact;
+        successMessage = `${amount} is on its way to ${recipient}`;
+      } else if (type === 'bank') {
+        successMessage = `${amount} is on its way to ${accountName}`;
+      } else {
+        successMessage = `${amount} sent to ${contact}`;
+      }
+
+      (navigation as any).replace('TransactionResult', {
+        status: isSuccess ? 'success' : 'error',
+        message: isSuccess
+          ? successMessage
+          : 'Insufficient balance or invalid PIN.',
+        transaction: transactionObj,
+      });
+    }, 5000);
+  };
+
   const handleSubmit = () => {
     if (pin.length === 4) {
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        // Simulate transaction result
-        const isSuccess = pin !== '0000'; // Example: 0000 fails
-        const now = new Date();
-        let transactionObj;
-        
-        if (type === 'Data') {
-          // Data transaction
-          transactionObj = {
-            type: 'Data',
-            network,
-            contact,
-            bundle,
-            price,
-            amount: price,
-            date: now.toISOString().slice(0, 10),
-            time: now.toTimeString().slice(0, 5),
-            sender: 'Obed Ihekaike',
-            receiver: contact,
-            phone: contact,
-            sessionId: 'DATA' + now.getTime(),
-            bankName: network,
-            status: isSuccess ? 'success' : 'error',
-          };
-        } else if (type === 'internal') {
-          // Internal transfer (usertag or account)
-          const recipient = usertag || accountName || 'Unknown';
-          transactionObj = {
-            type: 'Internal Transfer',
-            amount,
-            date: now.toISOString().slice(0, 10),
-            time: now.toTimeString().slice(0, 5),
-            sender: 'Obed Ihekaike',
-            receiver: recipient,
-            usertag,
-            accountNumber,
-            accountName,
-            sessionId: 'INT' + now.getTime(),
-            bankName: 'Payyy',
-            status: isSuccess ? 'success' : 'error',
-          };
-        } else if (type === 'bank') {
-          // Bank transfer
-          transactionObj = {
-            type: 'Bank Transfer',
-            amount,
-            fee: '₦10',
-            total: `₦${(parseFloat(amount.replace('₦', '').replace(',', '')) + 10).toLocaleString()}`,
-            date: now.toISOString().slice(0, 10),
-            time: now.toTimeString().slice(0, 5),
-            sender: 'Obed Ihekaike',
-            receiver: accountName,
-            accountNumber,
-            accountName,
-            bankName,
-            sessionId: 'BANK' + now.getTime(),
-            status: isSuccess ? 'success' : 'error',
-          };
-        } else {
-          // Airtime transaction
-          transactionObj = {
-            type: 'Airtime',
-            network,
-            contact,
-            amount,
-            date: now.toISOString().slice(0, 10),
-            time: now.toTimeString().slice(0, 5),
-            sender: 'Obed Ihekaike',
-            receiver: contact,
-            phone: contact,
-            sessionId: 'AIRTIME' + now.getTime(),
-            bankName: network,
-            status: isSuccess ? 'success' : 'error',
-          };
-        }
-
-        // Create appropriate success message
-        let successMessage = '';
-        if (type === 'Data') {
-          successMessage = `${bundle} sent to ${contact}`;
-        } else if (type === 'internal') {
-          const recipient = usertag || accountName || contact;
-          successMessage = `${amount} is on its way to ${recipient}`;
-        } else if (type === 'bank') {
-          successMessage = `${amount} is on its way to ${accountName}`;
-        } else {
-          successMessage = `${amount} sent to ${contact}`;
-        }
-
-        (navigation as any).replace('TransactionResult', {
-          status: isSuccess ? 'success' : 'error',
-          message: isSuccess
-            ? successMessage
-            : 'Insufficient balance or invalid PIN.',
-          transaction: transactionObj,
-        });
-      }, 5000);
+      processTransaction();
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { fontFamily: fontConfig.heading }]}>Enter Payment Pin</Text>
+
       <View style={styles.pinRow}>
         {[0, 1, 2, 3].map(i => (
           <View key={i} style={styles.pinDot}>
@@ -136,7 +192,12 @@ const PaymentScreen: React.FC = () => {
           </View>
         ))}
       </View>
-      <Keypad onKeyPress={handleKeyPress} onDelete={handleDelete} />
+      <Keypad 
+        onKeyPress={handleKeyPress} 
+        onDelete={handleDelete} 
+        onBiometric={handleBiometricAuth}
+        showBiometric={isEnabledForTransactions}
+      />
       <View style={styles.buttonRow}>
         <Button
           title="Cancel"

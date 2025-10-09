@@ -4,6 +4,8 @@
  */
 
 import { NotificationType } from '../contexts/NotificationContext';
+import { NotificationPreferences, shouldSendNotification } from '../contexts/NotificationPreferencesContext';
+import PushNotificationService from './pushNotificationService';
 
 export interface NotificationPayload {
   type: 'transaction' | 'security' | 'promotional' | 'system';
@@ -15,6 +17,7 @@ export interface NotificationPayload {
 export class NotificationService {
   private static instance: NotificationService;
   private listeners: ((payload: NotificationPayload) => void)[] = [];
+  private preferences: NotificationPreferences | null = null;
 
   private constructor() {}
 
@@ -23,6 +26,13 @@ export class NotificationService {
       NotificationService.instance = new NotificationService();
     }
     return NotificationService.instance;
+  }
+
+  /**
+   * Set notification preferences for filtering
+   */
+  setPreferences(preferences: NotificationPreferences): void {
+    this.preferences = preferences;
   }
 
   /**
@@ -36,10 +46,57 @@ export class NotificationService {
   }
 
   /**
-   * Trigger a new notification
+   * Trigger a new notification (respects user preferences)
    */
   notify(payload: NotificationPayload): void {
+    // Check if notifications should be sent based on preferences
+    if (this.preferences && !this.shouldSendNotificationForType(payload)) {
+      console.log(`🔕 Notification blocked by user preferences: ${payload.type} - ${payload.title}`);
+      return;
+    }
+
     this.listeners.forEach(listener => listener(payload));
+    
+    // Also send push notification if enabled
+    this.sendPushNotification(payload);
+  }
+
+  /**
+   * Send push notification based on preferences
+   */
+  private async sendPushNotification(payload: NotificationPayload): Promise<void> {
+    if (!this.preferences?.pushEnabled) {
+      console.log('🔕 Push notifications disabled by user');
+      return;
+    }
+
+    try {
+      if (payload.type === 'transaction') {
+        const transactionData = payload.data;
+        await PushNotificationService.sendTransactionNotification(
+          transactionData.subType as 'sent' | 'received' | 'success' | 'failed',
+          transactionData.amount,
+          payload.message
+        );
+      }
+    } catch (error) {
+      console.log('⚠️ Push notification failed (app continues normally):', error);
+    }
+  }
+
+  /**
+   * Check if notification should be sent based on type and preferences
+   */
+  private shouldSendNotificationForType(payload: NotificationPayload): boolean {
+    if (!this.preferences) return true; // If no preferences set, send all notifications
+
+    const transactionSubType = payload.data?.subType;
+    return shouldSendNotification(
+      this.preferences,
+      payload.type,
+      'push', // Default to push notifications
+      transactionSubType
+    );
   }
 
   /**
@@ -78,7 +135,10 @@ export class NotificationService {
       type: 'transaction',
       title,
       message,
-      data,
+      data: {
+        ...data,
+        subType: data.type // Add subType for preference filtering
+      },
     });
   }
 

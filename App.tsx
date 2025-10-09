@@ -5,11 +5,16 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { useAppFonts } from './src/theme/fonts';
 import { ActivityIndicator, View } from 'react-native';
 import { NotificationProvider } from './src/contexts/NotificationContext';
+import { NotificationPreferencesProvider } from './src/contexts/NotificationPreferencesContext';
+import { useNotificationPreferencesSync } from './src/hooks/useNotificationPreferencesSync';
 import NotificationContainer from './src/components/NotificationContainer';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 
 function AppContent() {
   const { pushToken, permissionStatus, registerForPushNotifications } = usePushNotifications();
+  
+  // Sync notification preferences with the service
+  useNotificationPreferencesSync();
 
   useEffect(() => {
     // Register for push notifications on app start
@@ -65,9 +70,11 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NotificationProvider>
-        <AppContent />
-      </NotificationProvider>
+      <NotificationPreferencesProvider>
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
+      </NotificationPreferencesProvider>
     </GestureHandlerRootView>
   );
 }

@@ -20,6 +20,7 @@ type ScreenProps = {
 
 const LoginPinConfirmScreen: React.FC<ScreenProps> = ({ navigation, route }) => {
   const [confirmPin, setConfirmPin] = useState(['', '', '', '', '', '']);
+  const [error, setError] = useState<string>('');
   const inputs = Array.from({ length: 6 }, () => useRef(null));
   const originalPin = route.params.pin;
 
@@ -28,6 +29,12 @@ const LoginPinConfirmScreen: React.FC<ScreenProps> = ({ navigation, route }) => 
       const newPin = [...confirmPin];
       newPin[idx] = text;
       setConfirmPin(newPin);
+      
+      // Clear error when user starts typing
+      if (error) {
+        setError('');
+      }
+      
       if (text && idx < 5) {
         // @ts-ignore
         inputs[idx + 1].current.focus();
@@ -44,6 +51,20 @@ const LoginPinConfirmScreen: React.FC<ScreenProps> = ({ navigation, route }) => 
 
   const confirmValue = confirmPin.join('');
   const isMatch = confirmValue.length === 6 && confirmValue === originalPin;
+
+  const handleConfirm = () => {
+    if (confirmValue.length !== 6) {
+      setError('Please enter all 6 digits');
+      return;
+    }
+    
+    if (!isMatch) {
+      setError('PINs do not match. Please try again.');
+      return;
+    }
+    
+    navigation.navigate('TransactionPinEntry');
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -66,7 +87,7 @@ const LoginPinConfirmScreen: React.FC<ScreenProps> = ({ navigation, route }) => 
                   marginHorizontal: 6,
                   borderRadius: 8,
                   borderWidth: 2,
-                  borderColor: colors.accent,
+                  borderColor: error ? (colors.error || '#e74c3c') : colors.accent,
                   backgroundColor: '#F4F6FA',
                   textAlign: 'center',
                   fontSize: 24,
@@ -81,12 +102,18 @@ const LoginPinConfirmScreen: React.FC<ScreenProps> = ({ navigation, route }) => 
               />
             ))}
           </View>
-          {confirmValue.length === 6 && !isMatch && (
-            <Text style={{ color: colors.error, marginTop: 16, textAlign: 'center' }}>PINs do not match. Please try again.</Text>
+          {error && (
+            <Text style={{ color: colors.error || '#e74c3c', marginTop: 16, textAlign: 'left' }}>
+              {error}
+            </Text>
           )}
         </View>
         <View style={{ width: '100%', marginBottom: 30 }}>
-          <Button title="Confirm Login Pin" onPress={() => navigation.navigate('TransactionPinEntry')} style={{ width: '100%' }} />
+          <Button 
+            title="Confirm Login Pin" 
+            onPress={handleConfirm} 
+            style={{ width: '100%' }} 
+          />
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>

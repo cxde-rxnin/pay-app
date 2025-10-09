@@ -69,6 +69,11 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
   const [selectedStamp, setSelectedStamp] = useState<string | null>(null);
   const [showBankPicker, setShowBankPicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [errors, setErrors] = useState({
+    bankName: '',
+    accountNumber: '',
+    amount: ''
+  });
   
   const slideAnim = useRef(new Animated.Value(height)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -144,8 +149,7 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
   }, [showBankPicker, modalVisible, slideAnim, fadeAnim, translateY]);
 
   const handleStampPress = (value: string) => {
-    setAmount(value);
-    setSelectedStamp(value);
+    handleStampSelect(value);
   };
 
   const handleAmountChange = (text: string) => {
@@ -153,12 +157,20 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
     const numericValue = text.replace(/[^0-9]/g, '');
     setAmount(numericValue);
     setSelectedStamp(null); // Deselect stamp when manually typing
+    // Clear amount error when user types
+    if (errors.amount) {
+      setErrors(prev => ({ ...prev, amount: '' }));
+    }
   };
 
   const handleAccountNumberChange = (text: string) => {
     // Only allow numbers and limit to 10 digits
     const numericValue = text.replace(/[^0-9]/g, '').slice(0, 10);
     setAccountNumber(numericValue);
+    // Clear account number error when user types
+    if (errors.accountNumber) {
+      setErrors(prev => ({ ...prev, accountNumber: '' }));
+    }
     
     // Simulate account name lookup when 10 digits are entered
     if (numericValue.length === 10 && bankName) {
@@ -174,6 +186,8 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
   const handleBankSelect = (bank: string) => {
     setBankName(bank);
     setShowBankPicker(false);
+    // Clear bank error when user selects a bank
+    setErrors(prev => ({ ...prev, bankName: '' }));
     // Reset account name when bank changes
     if (accountNumber.length === 10) {
       setAccountName('');
@@ -184,7 +198,49 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
     }
   };
 
+  const handleStampSelect = (value: string) => {
+    setAmount(value);
+    setSelectedStamp(value);
+    // Clear amount error when user selects stamp
+    if (errors.amount) {
+      setErrors(prev => ({ ...prev, amount: '' }));
+    }
+  };
+
   const handleContinue = () => {
+    const newErrors = {
+      bankName: '',
+      accountNumber: '',
+      amount: ''
+    };
+
+    // Validate all fields
+    if (!bankName.trim()) {
+      newErrors.bankName = 'Please select a bank';
+    }
+    
+    if (!accountNumber.trim()) {
+      newErrors.accountNumber = 'Account number is required';
+    } else if (accountNumber.length !== 10) {
+      newErrors.accountNumber = 'Account number must be 10 digits';
+    }
+    
+    if (!amount.trim()) {
+      newErrors.amount = 'Amount is required';
+    } else if (parseInt(amount) <= 0) {
+      newErrors.amount = 'Amount must be greater than 0';
+    } else if (parseInt(amount) < 100) {
+      newErrors.amount = 'Minimum amount is ₦100';
+    }
+
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    if (Object.values(newErrors).some(error => error !== '')) {
+      return;
+    }
+
+    // All validation passed
     if (bankName && accountNumber && accountName && amount) {
       // @ts-ignore
       navigation.navigate('SendToBankSummary', {
@@ -245,7 +301,7 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
                 paddingHorizontal: 16,
                 paddingVertical: 16,
                 borderWidth: 1,
-                borderColor: bankName ? colors.primary : colors.gray + '30',
+                borderColor: errors.bankName ? (colors.error || '#e74c3c') : (bankName ? colors.primary : colors.gray + '30'),
               }}
               onPress={() => setShowBankPicker(true)}
             >
@@ -259,6 +315,11 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
               </Text>
               <ArrowDown2 size={20} color={colors.gray} />
             </TouchableOpacity>
+            {errors.bankName && (
+              <Text style={{ color: colors.error || '#e74c3c', fontSize: 14, marginTop: 4 }}>
+                {errors.bankName}
+              </Text>
+            )}
           </View>
 
           {/* Account Number Input */}
@@ -272,7 +333,7 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
               paddingHorizontal: 16,
               paddingVertical: 4,
               borderWidth: 1,
-              borderColor: accountNumber ? colors.primary : colors.gray + '30',
+              borderColor: errors.accountNumber ? (colors.error || '#e74c3c') : (accountNumber ? colors.primary : colors.gray + '30'),
             }}>
               <TextInput
                 style={{
@@ -296,6 +357,11 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
                 </View>
               )}
             </View>
+            {errors.accountNumber && (
+              <Text style={{ color: colors.error || '#e74c3c', fontSize: 14, marginTop: 4 }}>
+                {errors.accountNumber}
+              </Text>
+            )}
             {!bankName && (
               <Text style={{ fontSize: 12, color: colors.gray, marginTop: 4 }}>
                 Please select a bank first
@@ -316,7 +382,7 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
               paddingHorizontal: 16,
               paddingVertical: 4,
               borderWidth: 1,
-              borderColor: amount ? colors.primary : colors.gray + '30',
+              borderColor: errors.amount ? (colors.error || '#e74c3c') : (amount ? colors.primary : colors.gray + '30'),
             }}>
               <Text style={{ fontSize: 18, color: colors.gray, marginRight: 4 }}>₦</Text>
               <TextInput
@@ -334,6 +400,11 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
                 keyboardType="numeric"
               />
             </View>
+            {errors.amount && (
+              <Text style={{ color: colors.error || '#e74c3c', fontSize: 14, marginTop: 4 }}>
+                {errors.amount}
+              </Text>
+            )}
           </View>
 
           {/* Amount Stamps */}

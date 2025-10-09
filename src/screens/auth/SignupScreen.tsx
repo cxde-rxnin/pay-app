@@ -20,6 +20,28 @@ const field = { backgroundColor: colors.surface, borderRadius: 12, paddingHorizo
 const SignupScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [error, setError] = useState('');
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleContinue = () => {
+    setError('');
+    
+    if (!email.trim()) {
+      setError('Email is required');
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
+    navigation.navigate('OTP');
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -51,9 +73,14 @@ const SignupScreen: React.FC<ScreenProps> = ({ navigation }) => {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
           />
+          {error && (
+            <Text style={{ color: colors.error || '#e74c3c', fontSize: 14, marginTop: 8 }}>
+              {error}
+            </Text>
+          )}
         </View>
         <View style={{ width: '100%', marginBottom: 30 }}>
-          <Button title="Continue" onPress={() => navigation.navigate('OTP')} style={{ width: '100%' }} />
+          <Button title="Continue" onPress={handleContinue} style={{ width: '100%' }} />
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>

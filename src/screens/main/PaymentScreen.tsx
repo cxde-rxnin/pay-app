@@ -15,6 +15,7 @@ const PaymentScreen: React.FC = () => {
 
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Biometric authentication
   const { 
@@ -36,7 +37,11 @@ const PaymentScreen: React.FC = () => {
   }, [isAvailable, isEnabled, isEnabledForTransactions]);
 
   const handleKeyPress = (digit: string) => {
-    if (pin.length < 4) setPin(pin + digit);
+    if (pin.length < 4) {
+      setPin(pin + digit);
+      // Clear error when user starts typing
+      if (error) setError('');
+    }
   };
   
   const handleDelete = () => {
@@ -176,9 +181,11 @@ const PaymentScreen: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    if (pin.length === 4) {
-      processTransaction();
+    if (pin.length !== 4) {
+      setError('Please enter your 4-digit PIN');
+      return;
     }
+    processTransaction();
   };
 
   return (
@@ -192,6 +199,10 @@ const PaymentScreen: React.FC = () => {
           </View>
         ))}
       </View>
+      
+      {error && (
+        <Text style={styles.errorText}>{error}</Text>
+      )}
       <Keypad 
         onKeyPress={handleKeyPress} 
         onDelete={handleDelete} 
@@ -252,6 +263,12 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: '700',
     marginTop: -1.5,
+  },
+  errorText: {
+    color: colors.error || '#e74c3c',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
   },
   buttonRow: {
     flexDirection: 'row',

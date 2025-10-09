@@ -35,6 +35,10 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
   const [tag, setTag] = useState('');
   const [amount, setAmount] = useState('');
   const [selectedStamp, setSelectedStamp] = useState<string | null>(null);
+  const [errors, setErrors] = useState({
+    tag: '',
+    amount: ''
+  });
 
   const handleStampPress = (value: string) => {
     setAmount(value);
@@ -46,9 +50,52 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
     const numericValue = text.replace(/[^0-9]/g, '');
     setAmount(numericValue);
     setSelectedStamp(null); // Deselect stamp when manually typing
+    // Clear amount error when user types
+    if (errors.amount) {
+      setErrors(prev => ({ ...prev, amount: '' }));
+    }
+  };
+
+  const handleTagChange = (text: string) => {
+    setTag(text);
+    // Clear tag error when user types
+    if (errors.tag) {
+      setErrors(prev => ({ ...prev, tag: '' }));
+    }
   };
 
   const handleContinue = () => {
+    const newErrors = {
+      tag: '',
+      amount: ''
+    };
+
+    // Validate tag field
+    if (!tag.trim()) {
+      newErrors.tag = 'Recipient tag is required';
+    } else if (!tag.startsWith('@')) {
+      newErrors.tag = 'Tag must start with @';
+    } else if (tag.length < 3) {
+      newErrors.tag = 'Tag must be at least 3 characters';
+    }
+
+    // Validate amount field
+    if (!amount.trim()) {
+      newErrors.amount = 'Amount is required';
+    } else if (parseInt(amount) <= 0) {
+      newErrors.amount = 'Amount must be greater than 0';
+    } else if (parseInt(amount) < 100) {
+      newErrors.amount = 'Minimum amount is ₦100';
+    }
+
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    if (Object.values(newErrors).some(error => error !== '')) {
+      return;
+    }
+
+    // All validation passed
     if (tag && amount) {
       // @ts-ignore
       navigation.navigate('SendToLemoSummary', {
@@ -101,7 +148,7 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
               paddingHorizontal: 16,
               paddingVertical: 4,
               borderWidth: 1,
-              borderColor: tag ? colors.primary : colors.gray + '30',
+              borderColor: errors.tag ? (colors.error || '#e74c3c') : (tag ? colors.primary : colors.gray + '30'),
             }}>
               <Text style={{ fontSize: 18, color: colors.gray, marginRight: 4 }}>@</Text>
               <TextInput
@@ -114,12 +161,17 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
                 placeholder="Enter username"
                 placeholderTextColor={colors.gray}
                 value={tag}
-                onChangeText={setTag}
+                onChangeText={handleTagChange}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
               <User size={20} color={colors.gray} />
             </View>
+            {errors.tag && (
+              <Text style={{ color: colors.error || '#e74c3c', fontSize: 14, marginTop: 4 }}>
+                {errors.tag}
+              </Text>
+            )}
           </View>
 
           {/* Amount Input */}
@@ -135,7 +187,7 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
               paddingHorizontal: 16,
               paddingVertical: 4,
               borderWidth: 1,
-              borderColor: amount ? colors.primary : colors.gray + '30',
+              borderColor: errors.amount ? (colors.error || '#e74c3c') : (amount ? colors.primary : colors.gray + '30'),
             }}>
               <Text style={{ fontSize: 18, color: colors.gray, marginRight: 4 }}>₦</Text>
               <TextInput
@@ -154,6 +206,11 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
                 keyboardType="numeric"
               />
             </View>
+            {errors.amount && (
+              <Text style={{ color: colors.error || '#e74c3c', fontSize: 14, marginTop: 4 }}>
+                {errors.amount}
+              </Text>
+            )}
           </View>
 
           {/* Amount Stamps */}

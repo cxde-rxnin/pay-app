@@ -11,6 +11,10 @@ import SendToLemoSummaryScreen from '../screens/main/SendToLemoSummaryScreen';
 import SendToBankScreen from '../screens/main/SendToBankScreen';
 import SendToBankSummaryScreen from '../screens/main/SendToBankSummaryScreen';
 import TransactionDetailsScreen from '../screens/modals/TransactionDetailsScreen';
+import SecurityPinEmailVerificationScreen from '../screens/main/SecurityPinEmailVerificationScreen';
+import SecurityPinEmailCodeScreen from '../screens/main/SecurityPinEmailCodeScreen';
+import SecurityPinChangeScreen from '../screens/main/SecurityPinChangeScreen';
+import SecurityPinConfirmScreen from '../screens/main/SecurityPinConfirmScreen';
 import { navigationRef } from '../services/navigationService';
 
 const RootStack = createStackNavigator();
@@ -31,6 +35,10 @@ const RootNavigator = () => (
       <RootStack.Screen name="TransactionDetails" component={TransactionDetailsScreen} />
       <RootStack.Screen name="AccountVerification" component={require('../screens/main/AccountVerificationScreen').default} />
       <RootStack.Screen name="TransactionResult" component={TransactionResultScreen} />
+      <RootStack.Screen name="SecurityPinEmailVerification" component={SecurityPinEmailVerificationScreen} />
+      <RootStack.Screen name="SecurityPinEmailCode" component={SecurityPinEmailCodeScreen} />
+      <RootStack.Screen name="SecurityPinChange" component={SecurityPinChangeScreen} />
+      <RootStack.Screen name="SecurityPinConfirm" component={SecurityPinConfirmScreen} />
     </RootStack.Navigator>
   </NavigationContainer>
 );

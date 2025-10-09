@@ -46,8 +46,16 @@ export class PushNotificationService {
     try {
       // Check if running on physical device
       if (!Device.isDevice) {
-        console.log('Push notifications only work on physical devices');
+        console.log('⚠️ Push notifications only work on physical devices');
         return null;
+      }
+
+      // Check if running in Expo Go
+      const isExpoGo = Constants.appOwnership === 'expo';
+      if (isExpoGo) {
+        console.log('⚠️ Push notifications have limited support in Expo Go (SDK 53+)');
+        console.log('ℹ️ For full push notification support, use a development build');
+        // Continue anyway for local notifications
       }
 
       // Request permissions
@@ -60,15 +68,43 @@ export class PushNotificationService {
       }
 
       if (finalStatus !== 'granted') {
-        console.log('Failed to get push notification permissions');
+        console.log('❌ Failed to get push notification permissions');
         return null;
       }
 
-      // Get push token (Expo Go handles projectId automatically)
-      const tokenData = await Notifications.getExpoPushTokenAsync();
+      // Get push token with proper error handling
+      let tokenData;
+      try {
+        // For Expo Go, try without projectId first
+        tokenData = await Notifications.getExpoPushTokenAsync();
+      } catch (tokenError: any) {
+        console.log('❌ Failed to get push token:', tokenError?.message || tokenError);
+        
+        if (tokenError?.message?.includes('projectId')) {
+          console.log('ℹ️ This is likely because you\'re running in Expo Go');
+          console.log('ℹ️ Push notifications work fully only in development builds');
+          
+          // Try with the projectId from app.json if available
+          try {
+            const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+            if (projectId) {
+              console.log('🔄 Retrying with projectId:', projectId);
+              tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+            } else {
+              console.log('❌ No projectId found in app.json');
+              return null;
+            }
+          } catch (retryError: any) {
+            console.log('❌ Retry with projectId also failed:', retryError?.message || retryError);
+            return null;
+          }
+        } else {
+          throw tokenError; // Re-throw if it's a different error
+        }
+      }
 
       this.pushToken = tokenData.data;
-      console.log('✅ Push Token:', this.pushToken);
+      console.log('✅ Push Token obtained:', this.pushToken);
 
       // Configure notification channel for Android
       if (Platform.OS === 'android') {
@@ -108,8 +144,15 @@ export class PushNotificationService {
         token: this.pushToken,
         type: 'expo',
       };
-    } catch (error) {
-      console.error('Error registering for push notifications:', error);
+    } catch (error: any) {
+      console.error('❌ Error registering for push notifications:', error?.message || error);
+      
+      // Provide helpful error messages
+      if (error?.message?.includes('projectId')) {
+        console.log('💡 Solution: Use a development build for full push notification support');
+        console.log('💡 Alternative: Add projectId to app.json under extra.eas.projectId');
+      }
+      
       return null;
     }
   }

@@ -9,22 +9,39 @@ import NotificationContainer from './src/components/NotificationContainer';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 
 function AppContent() {
-  const { pushToken, registerForPushNotifications } = usePushNotifications();
+  const { pushToken, permissionStatus, registerForPushNotifications } = usePushNotifications();
 
   useEffect(() => {
     // Register for push notifications on app start
-    registerForPushNotifications();
+    const initializePushNotifications = async () => {
+      try {
+        await registerForPushNotifications();
+      } catch (error) {
+        console.log('Push notification initialization failed:', error);
+        // App continues to work without push notifications
+      }
+    };
 
-    // Log the token (in production, send this to your backend)
+    initializePushNotifications();
+  }, [registerForPushNotifications]);
+
+  useEffect(() => {
+    // Log the token when available (in production, send this to your backend)
     if (pushToken) {
-      console.log('Push notification token:', pushToken);
+      console.log('✅ Push notification token available:', pushToken);
       // TODO: Send token to your backend
       // await fetch('https://your-api.com/register-device', {
       //   method: 'POST',
       //   body: JSON.stringify({ token: pushToken, userId: currentUserId })
       // });
+    } else {
+      console.log('ℹ️ Push notifications not available - app works normally with local notifications only');
     }
-  }, [pushToken, registerForPushNotifications]);
+
+    if (permissionStatus) {
+      console.log('📱 Push notification permission status:', permissionStatus);
+    }
+  }, [pushToken, permissionStatus]);
 
   return (
     <>

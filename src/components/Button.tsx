@@ -17,7 +17,11 @@ const Button: React.FC<Props> = ({ title, onPress, type = 'primary', style, disa
     activeOpacity={0.8}
     disabled={disabled}
   >
-    <Text style={type === 'primary' ? styles.buttonPrimaryText : styles.buttonSecondaryText}>{title}</Text>
+    {typeof title === 'string' ? (
+      <Text style={type === 'primary' ? styles.buttonPrimaryText : styles.buttonSecondaryText}>{title}</Text>
+    ) : (
+      title
+    )}
   </TouchableOpacity>
 );
 

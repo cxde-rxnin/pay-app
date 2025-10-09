@@ -7,7 +7,6 @@ import { Ionicons } from '@expo/vector-icons';
 import TransactionImage from '../../components/TransactionImage';
 import { captureRef } from 'react-native-view-shot';
 import { useNotifications } from '../../contexts/NotificationContext';
-import NotificationService from '../../services/notificationService';
 import PushNotificationService from '../../services/pushNotificationService';
 
 const resultGifs: Record<string, any> = {
@@ -108,32 +107,33 @@ const TransactionResultScreen: React.FC = () => {
       amount: status === 'success' ? `-${amount}` : amount,
     });
 
-    // Also trigger NotificationService for consistency
-    if (status === 'success') {
-      NotificationService.notifyTransaction({
-        type: 'success',
-        amount: cleanAmount,
-        description: notificationMessage,
-      });
-    } else {
-      NotificationService.notifyTransaction({
-        type: 'failed',
-        amount: cleanAmount,
-        description: notificationMessage,
-      });
-    }
-
     // Send push notification (will be delivered even when app is closed)
     const pushNotificationType = 
       transaction.type === 'Internal Transfer' || transaction.type === 'Bank Transfer'
         ? (status === 'success' ? 'sent' : 'failed')
         : (status === 'success' ? 'success' : 'failed');
     
-    PushNotificationService.sendTransactionNotification(
-      pushNotificationType as 'sent' | 'received' | 'success' | 'failed',
-      cleanAmount,
-      notificationMessage
-    );
+    console.log('🔔 Sending push notification:', {
+      type: pushNotificationType,
+      amount: cleanAmount,
+      message: notificationMessage
+    });
+
+    // Send push notification asynchronously
+    const sendPushNotification = async () => {
+      try {
+        await PushNotificationService.sendTransactionNotification(
+          pushNotificationType as 'sent' | 'received' | 'success' | 'failed',
+          cleanAmount,
+          notificationMessage
+        );
+      } catch (pushError) {
+        console.log('⚠️ Push notification failed (app continues normally):', pushError);
+        // Transaction notification still saved locally and in notification center
+      }
+    };
+
+    sendPushNotification();
   }, [transaction, status, message, showNotification, addNotification]);
   
   // Use sent.gif for internal transfers and bank transfers, paid.gif for other successful transactions

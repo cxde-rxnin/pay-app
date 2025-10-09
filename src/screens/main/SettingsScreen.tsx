@@ -249,6 +249,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       <SecurityModal 
         visible={showSecurityModal} 
         onClose={() => setShowSecurityModal(false)} 
+        navigation={navigation}
       />
 
       {/* Notification Modal */}
@@ -407,7 +408,7 @@ const ProfileModal: React.FC<{ visible: boolean; onClose: () => void }> = ({ vis
 };
 
 // Security Modal Component
-const SecurityModal: React.FC<{ visible: boolean; onClose: () => void }> = ({ visible, onClose }) => {
+const SecurityModal: React.FC<{ visible: boolean; onClose: () => void; navigation: any }> = ({ visible, onClose, navigation }) => {
   const slideAnim = React.useRef(new Animated.Value(height)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const translateY = React.useRef(new Animated.Value(0)).current;
@@ -521,7 +522,19 @@ const SecurityModal: React.FC<{ visible: boolean; onClose: () => void }> = ({ vi
               style={modalStyles.option}
               onPress={() => {
                 handleClose();
-                Alert.alert(option.label, 'This feature will allow you to update your PIN');
+                let pinType: 'login' | 'transaction' | 'duress';
+                
+                if (option.label === 'Change Login PIN') {
+                  pinType = 'login';
+                } else if (option.label === 'Change Transaction PIN') {
+                  pinType = 'transaction';
+                } else if (option.label === 'Change Duress PIN') {
+                  pinType = 'duress';
+                } else {
+                  return;
+                }
+                
+                navigation.navigate('SecurityPinEmailVerification', { pinType });
               }}
             >
               <View style={modalStyles.optionIcon}>{option.icon}</View>

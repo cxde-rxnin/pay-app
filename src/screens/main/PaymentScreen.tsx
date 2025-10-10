@@ -55,7 +55,7 @@ const PaymentScreen: React.FC = () => {
       
       const result = await authenticateTransaction(
         transactionType,
-        transactionAmount ? `₦${transactionAmount}` : undefined
+        transactionAmount
       );
       
       if (result.success) {

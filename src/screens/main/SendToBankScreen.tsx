@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, FlatList, Animated, Dimensions, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, FlatList, Animated, Dimensions, TouchableWithoutFeedback, Platform } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { BlurView } from 'expo-blur';
@@ -450,7 +450,8 @@ const SendToBankScreen: React.FC<SendToBankScreenProps> = ({ navigation }) => {
               backgroundColor: colors.primary + '10',
               borderRadius: 12,
               padding: 16,
-              marginBottom: 24,
+              marginTop: Platform.OS === 'ios' ? -20 : -20,
+              marginBottom: Platform.OS === 'ios' ? 0 : 20,
             }}>
               <Text style={{ fontSize: 14, color: colors.gray, marginBottom: 8 }}>
                 You're sending

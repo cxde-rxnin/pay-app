@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
@@ -43,6 +43,10 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
   const handleStampPress = (value: string) => {
     setAmount(value);
     setSelectedStamp(value);
+    // Clear amount error when user selects a stamp
+    if (errors.amount) {
+      setErrors(prev => ({ ...prev, amount: '' }));
+    }
   };
 
   const handleAmountChange = (text: string) => {
@@ -57,7 +61,9 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
   };
 
   const handleTagChange = (text: string) => {
-    setTag(text);
+    // Remove any @ symbols that user might type
+    const cleanText = text.replace(/@/g, '');
+    setTag(cleanText);
     // Clear tag error when user types
     if (errors.tag) {
       setErrors(prev => ({ ...prev, tag: '' }));
@@ -73,10 +79,8 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
     // Validate tag field
     if (!tag.trim()) {
       newErrors.tag = 'Recipient tag is required';
-    } else if (!tag.startsWith('@')) {
-      newErrors.tag = 'Tag must start with @';
     } else if (tag.length < 3) {
-      newErrors.tag = 'Tag must be at least 3 characters';
+      newErrors.tag = 'Username must be at least 3 characters';
     }
 
     // Validate amount field
@@ -99,7 +103,7 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
     if (tag && amount) {
       // @ts-ignore
       navigation.navigate('SendToLemoSummary', {
-        recipientTag: tag,
+        recipientTag: tag, // Pass just the username without @ prefix
         amount: amount,
       });
     }
@@ -257,16 +261,16 @@ const SendToLemoScreen: React.FC<SendToLemoScreenProps> = ({ navigation }) => {
               borderRadius: 12,
               padding: 16,
               marginBottom: 0, 
-              marginTop: 100,
+              marginTop: Platform.OS === 'ios' ? 100 : 70,
             }}>
               <Text style={{ fontSize: 14, color: colors.gray, marginBottom: 8 }}>
-                You're sending
+              You're sending
               </Text>
               <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 4, fontFamily: fontConfig.heading }}>
-                ₦{parseInt(amount).toLocaleString()}
+              ₦{parseInt(amount).toLocaleString()}
               </Text>
               <Text style={{ fontSize: 14, color: colors.gray }}>
-                to @{tag}
+              to @{tag}
               </Text>
             </View>
           )}

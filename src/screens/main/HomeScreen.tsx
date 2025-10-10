@@ -139,7 +139,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
             marginBottom: 18,
           }}
         >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', gap: 18, }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', gap: 12, }}>
             <TouchableOpacity onPress={() => setShowAirtimeModal(true)}>
               <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
                 <Image

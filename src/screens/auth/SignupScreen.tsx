@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
-
-type AuthStackParamList = {
-  Signup: undefined;
-  OTP: undefined;
-};
+import apiService from '../../services/apiService';
+import { AuthStackParamList } from '../../navigation/AuthStack';
 
 type ScreenProps = {
   navigation: StackNavigationProp<AuthStackParamList, 'Signup'>;
@@ -21,13 +18,14 @@ const SignupScreen: React.FC<ScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     setError('');
     
     if (!email.trim()) {
@@ -39,8 +37,29 @@ const SignupScreen: React.FC<ScreenProps> = ({ navigation }) => {
       setError('Please enter a valid email address');
       return;
     }
-    
-    navigation.navigate('OTP');
+
+    setIsLoading(true);
+    try {
+      // Call backend to check email availability
+      const result = await apiService.checkEmailAvailability({
+        email: email.trim()
+      });
+
+      if (result.success) {
+        // Email is available, user created, and OTP sent
+        navigation.navigate('OTP', { 
+          userId: result.data?.userId || '',
+          email: email.trim()
+        });
+      } else {
+        setError(result.error || 'This email is already registered. Please use a different email or try logging in.');
+      }
+    } catch (error) {
+      console.error('Email verification error:', error);
+      setError('Unable to verify email. Please check your internet connection.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -80,7 +99,12 @@ const SignupScreen: React.FC<ScreenProps> = ({ navigation }) => {
           )}
         </View>
         <View style={{ width: '100%', marginBottom: 30 }}>
-          <Button title="Continue" onPress={handleContinue} style={{ width: '100%' }} />
+          <Button
+            title={isLoading ? 'Sending Email' : 'Continue'}
+            onPress={handleContinue}
+            style={{ width: '100%' }}
+            disabled={isLoading}
+          />
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>

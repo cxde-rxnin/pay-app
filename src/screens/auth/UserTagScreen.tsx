@@ -5,6 +5,7 @@ import Button from '../../components/Button';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
+import apiService from '../../services/apiService'; // Adjust the import based on your project structure
 
 type AuthStackParamList = {
   UserTag: undefined;
@@ -39,7 +40,20 @@ const UserTagScreen: React.FC<ScreenProps> = ({ navigation }) => {
           />
         </View>
         <View style={{ width: '100%', marginBottom: 30 }}>
-          <Button title="Continue" onPress={() => navigation.navigate('Login')} style={{ width: '100%' }} />
+          <Button
+            title="Continue"
+            onPress={async () => {
+              // Call virtual account creation API
+              const result = await apiService.createVirtualAccount();
+              if (result.success) {
+                navigation.navigate('Login');
+              } else {
+                // Show error (could use a Toast or Alert)
+                alert(result.error || 'Failed to create virtual account');
+              }
+            }}
+            style={{ width: '100%' }}
+          />
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>

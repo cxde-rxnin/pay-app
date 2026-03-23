@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Platform, Animated, Dimensions, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Platform, Animated, Dimensions, TouchableWithoutFeedback, Keyboard, Alert, Image } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import * as Contacts from 'expo-contacts';
 import colors from '../../theme/colors';
@@ -17,6 +17,30 @@ const NETWORKS = [
   { name: 'Glo', color: '#009A44' },
   { name: '9mobile', color: '#6CC417' },
 ];
+
+// Map network names to local asset images
+const NETWORK_LOGOS: Record<string, any> = {
+  MTN: require('../../assets/network/mtn.png'),
+  Airtel: require('../../assets/network/airtel.png'),
+  Glo: require('../../assets/network/glo.png'),
+  '9mobile': require('../../assets/network/9mobile.png'),
+};
+
+// Helper to return CDN-hosted logo URLs (fallbacks to safe placeholders)
+const getNetworkLogo = (name: string) => {
+  switch ((name || '').toLowerCase()) {
+    case 'mtn':
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/MTN_Logo.png/320px-MTN_Logo.png';
+    case 'airtel':
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Airtel_logo.svg/320px-Airtel_logo.svg.png';
+    case 'glo':
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Glo_logo.png/320px-Glo_logo.png';
+    case '9mobile':
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/9mobile_logo.png/320px-9mobile_logo.png';
+    default:
+      return null;
+  }
+};
 
 interface AirtimeModalProps {
   visible: boolean;
@@ -241,16 +265,24 @@ const AirtimeModal: React.FC<AirtimeModalProps> = ({ visible, onClose, onContinu
                   <TouchableOpacity
                     key={net.name}
                     style={[
-                      styles.networkBox, 
-                      selectedNetwork === net.name && { 
-                        borderColor: colors.primary, 
+                      styles.networkBox,
+                      selectedNetwork === net.name && {
+                        borderColor: colors.primary,
                         borderWidth: 2,
                         backgroundColor: colors.primary + '15'
                       }
                     ]}
                     onPress={() => setSelectedNetwork(net.name)}
+                    accessibilityLabel={net.name}
                   >
-                    <Text style={{ color: net.color, fontWeight: '700' }}>{net.name}</Text>
+                    {/* Local asset logo */}
+                    {NETWORK_LOGOS[net.name] ? (
+                      <Image
+                        source={NETWORK_LOGOS[net.name]}
+                        style={styles.networkLogo}
+                        resizeMode="contain"
+                      />
+                    ) : null}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -430,15 +462,30 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 4,
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 9999,
     backgroundColor: '#F7F8FA',
     alignItems: 'center',
     borderColor: '#eee',
     borderWidth: 1,
   },
+  networkLogo: {
+    width: 72,
+    height: 48,
+  },
+  networkFallback: {
+    width: 48,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+  },
+  networkFallbackText: {
+    fontWeight: '800',
+    fontSize: 12,
+  },
   continueBtn: {
     backgroundColor: colors.primary,
-    borderRadius: 10,
+    borderRadius: 9999,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,

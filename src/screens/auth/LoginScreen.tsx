@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
+import apiService from '../../services/apiService';
 
 type AuthStackParamList = {
   Login: undefined;
@@ -43,7 +44,7 @@ const LoginScreen: React.FC<ScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const newErrors = { email: '', pin: '' };
 
     if (!email.trim()) {
@@ -67,12 +68,35 @@ const LoginScreen: React.FC<ScreenProps> = ({ navigation }) => {
 
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Call the real backend login API
+      const result = await apiService.login({
+        email: email.trim(),
+        loginPin: pin
+      });
+
+      if (result.success) {
+        // Login successful, navigate to app
+        console.log('✅ Login successful:', result.data);
+        navigation.navigate('App');
+      } else {
+        // Login failed, show error
+        Alert.alert(
+          'Login Failed',
+          result.error || 'Invalid email or PIN. Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert(
+        'Login Error',
+        'Unable to connect to server. Please check your internet connection.',
+        [{ text: 'OK' }]
+      );
+    } finally {
       setIsLoading(false);
-      // Add actual login logic here
-      navigation.navigate('App');
-    }, 1500);
+    }
   };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>

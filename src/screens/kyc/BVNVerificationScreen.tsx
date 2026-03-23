@@ -5,6 +5,7 @@ import Button from '../../components/Button';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
+import apiService from '../../services/apiService'; // Import the API service
 
 type KYCStackParamList = {
   BVNVerification: undefined;
@@ -30,16 +31,23 @@ const BVNVerificationScreen: React.FC<ScreenProps> = ({ navigation }) => {
     }
 
     setLoading(true);
-    
-    // Simulate API call to verify BVN
-    setTimeout(() => {
+    try {
+      // Call API to verify BVN and update KYC
+      const result = await apiService.submitBVN(bvn);
       setLoading(false);
-      Alert.alert(
-        'BVN Verified',
-        'Your BVN has been verified successfully. You are now Tier 1 (Basic) with a daily limit of ₦50,000',
-        [{ text: 'Continue', onPress: () => navigation.navigate('LoginPin') }]
-      );
-    }, 2000);
+      if (result.success) {
+        Alert.alert(
+          'BVN Verified',
+          'Your BVN has been verified successfully. You are now Tier 1 (Basic) with a daily limit of ₦50,000',
+          [{ text: 'Continue', onPress: () => navigation.navigate('LoginPin') }]
+        );
+      } else {
+        Alert.alert('Verification Failed', result.error || 'Unable to verify BVN. Please try again.');
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Verification Error', 'An error occurred while verifying your BVN. Please try again.');
+    }
   };
 
   return (

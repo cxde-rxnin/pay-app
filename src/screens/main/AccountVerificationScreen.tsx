@@ -618,7 +618,7 @@ const AccountVerificationScreen: React.FC<AccountVerificationScreenProps> = ({ n
                         flex: 1,
                         backgroundColor: colors.gray + '15',
                         padding: 16,
-                        borderRadius: 12,
+                        borderRadius: 9999,
                         alignItems: 'center',
                       }}
                     >
@@ -779,7 +779,7 @@ const AccountVerificationScreen: React.FC<AccountVerificationScreenProps> = ({ n
                       borderRadius: 10,
                       marginBottom: 24,
                     }}>
-                      <Text style={{ fontSize: 12, color: colors.text, lineHeight: 18 }}>
+                      <Text style={{ fontSize: 12, color: colors.text, lineHeight: 18, marginBottom: 6 }}>
                         📸 Ensure your face is clearly visible and well-lit for verification
                       </Text>
                     </View>
@@ -791,7 +791,7 @@ const AccountVerificationScreen: React.FC<AccountVerificationScreenProps> = ({ n
                           flex: 1,
                           backgroundColor: colors.gray + '15',
                           padding: 16,
-                          borderRadius: 12,
+                          borderRadius: 9999,
                           alignItems: 'center',
                         }}
                       >
@@ -954,7 +954,7 @@ const AccountVerificationScreen: React.FC<AccountVerificationScreenProps> = ({ n
                         flex: 1,
                         backgroundColor: colors.gray + '15',
                         padding: 16,
-                        borderRadius: 12,
+                        borderRadius: 9999,
                         alignItems: 'center',
                       }}
                     >

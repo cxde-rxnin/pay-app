@@ -12,7 +12,18 @@ type Props = {
 
 const Button: React.FC<Props> = ({ title, onPress, type = 'primary', style, disabled }) => (
   <TouchableOpacity
-    style={[type === 'primary' ? styles.buttonPrimary : styles.buttonSecondary, style, { paddingVertical: 18, borderRadius: 12, alignItems: 'center', justifyContent: 'center', opacity: disabled ? 0.5 : 1 }]}
+    style={[
+      type === 'primary' ? styles.buttonPrimary : styles.buttonSecondary,
+      style,
+      {
+        paddingVertical: 14,
+        paddingHorizontal: 20,
+        borderRadius: 9999,
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: disabled ? 0.5 : 1,
+      },
+    ]}
     onPress={disabled ? undefined : onPress}
     activeOpacity={0.8}
     disabled={disabled}

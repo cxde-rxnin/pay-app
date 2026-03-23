@@ -6,12 +6,34 @@ import WelcomeScreen from '../screens/auth/WelcomeScreen';
 import WelcomeBackScreen from '../screens/auth/WelcomeBackScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
 import OTPScreen from '../screens/auth/OTPScreen';
+import FinalOTPScreen from '../screens/auth/FinalOTPScreen';
 import PinSetupScreen from '../screens/auth/PinSetupScreen';
 import UserTagScreen from '../screens/auth/UserTagScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import LoginPinScreen from '../screens/auth/LoginPinScreen';
 
-const Stack = createStackNavigator();
+export type AuthStackParamList = {
+  Splash: undefined;
+  Onboarding: undefined;
+  Welcome: undefined;
+  WelcomeBack: undefined;
+  Signup: undefined;
+  FullSignup: { email: string };
+  OTP: { userId: string; email: string };
+  FinalOTP: { userId: string; email: string };
+  LoginPin: undefined;
+  LoginPinConfirm: undefined;
+  TransactionPinEntry: undefined;
+  TransactionPinConfirm: undefined;
+  DuressPinEntry: undefined;
+  DuressPinConfirm: undefined;
+  BVNVerification: undefined;
+  NINSelfieVerification: undefined;
+  UserTag: undefined;
+  Login: undefined;
+};
+
+const Stack = createStackNavigator<AuthStackParamList>();
 
 const AuthStack = () => (
   <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
@@ -21,6 +43,7 @@ const AuthStack = () => (
     <Stack.Screen name="WelcomeBack" component={WelcomeBackScreen} />
     <Stack.Screen name="Signup" component={SignupScreen} />
     <Stack.Screen name="OTP" component={OTPScreen} />
+    <Stack.Screen name="FinalOTP" component={FinalOTPScreen} />
     <Stack.Screen name="LoginPin" component={LoginPinScreen} />
     <Stack.Screen name="LoginPinConfirm" component={require('../screens/auth/LoginPinConfirmScreen').default} />
     <Stack.Screen name="TransactionPinEntry" component={require('../screens/auth/TransactionPinEntryScreen').default} />

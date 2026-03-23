@@ -27,6 +27,7 @@ type RootStackParamList = {
   SendToLemo: undefined;
   SendToBank: undefined;
   TransactionDetails: any;
+  BackendTest: undefined;
 };
 
 type AppTabParamList = {
@@ -130,7 +131,7 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
           <Button title="Send Money"  onPress={() => setShowSendMoney(true)} style={{ flex: 1, marginLeft: 10 }} />
         </View>
 
-        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 24, marginTop: 24, fontFamily: fontConfig.heading }}>Quick Action</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 24, marginTop: 24, fontFamily: fontConfig.heading }}>Quick Actions</Text>
         <View
           style={{
             backgroundColor: '#ffffff',
@@ -139,8 +140,8 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
             marginBottom: 18,
           }}
         >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', gap: 12, }}>
-            <TouchableOpacity onPress={() => setShowAirtimeModal(true)}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', gap: 12 }}>
+            <TouchableOpacity onPress={() => setShowAirtimeModal(true)} style={{ alignItems: 'center' }}>
               <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
                 <Image
                   source={require('../../assets/airtime.png')}
@@ -148,8 +149,10 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
                   resizeMode="cover"
                 />
               </View>
+              <Text style={{ marginTop: 8, fontSize: 12, color: colors.text, fontWeight: '600' }}>Airtime</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowDataModal(true)}>
+
+            <TouchableOpacity onPress={() => setShowDataModal(true)} style={{ alignItems: 'center' }}>
               <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
                 <Image
                   source={require('../../assets/wifi.png')}
@@ -157,8 +160,10 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
                   resizeMode="cover"
                 />
               </View>
+              <Text style={{ marginTop: 8, fontSize: 12, color: colors.text, fontWeight: '600' }}>Data</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowHistoryModal(true)}>
+
+            <TouchableOpacity onPress={() => setShowHistoryModal(true)} style={{ alignItems: 'center' }}>
               <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
                 <Image
                   source={require('../../assets/history.png')}
@@ -166,15 +171,18 @@ const HomeScreen: React.FC<ScreenProps> = ({ navigation }) => {
                   resizeMode="cover"
                 />
               </View>
+              <Text style={{ marginTop: 8, fontSize: 12, color: colors.text, fontWeight: '600' }}>History</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowQrCodeModal(true)}>
-                <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
+
+            <TouchableOpacity onPress={() => setShowQrCodeModal(true)} style={{ alignItems: 'center' }}>
+              <View style={{ alignItems: 'center', backgroundColor: '#cccccc2f', padding: 12, borderRadius: 12 }}>
                 <Image
                   source={require('../../assets/tag.png')}
                   style={{ width: 48, height: 48, borderRadius: 8 }}
                   resizeMode="cover"
                 />
-                </View>
+              </View>
+              <Text style={{ marginTop: 8, fontSize: 12, color: colors.text, fontWeight: '600' }}>QR</Text>
             </TouchableOpacity>
           </View>
         </View>

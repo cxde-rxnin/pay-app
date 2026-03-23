@@ -9,7 +9,7 @@ type Props = {
 };
 
 const BalanceCard: React.FC<Props> = ({ balance, currency = 'NGN' }) => {
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(false);
   return (
     <View style={[cardStyles.card, { position: 'relative' }]}> 
       <Text style={{ color: colors.gray, fontSize: 16, fontWeight: '500' }}>Total Balance ({currency})</Text>

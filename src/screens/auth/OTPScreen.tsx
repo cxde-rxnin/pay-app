@@ -1,22 +1,21 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import styles from '../../theme/styles';
 import Button from '../../components/Button';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
-
-type AuthStackParamList = {
-  OTP: undefined;
-  LoginPin: undefined;
-  BVNVerification: undefined;
-};
+import apiService from '../../services/apiService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthStackParamList } from '../../navigation/AuthStack';
 
 type ScreenProps = {
   navigation: StackNavigationProp<AuthStackParamList, 'OTP'>;
+  route: { params: { userId: string; email: string } };
 };
 
-const OTPScreen: React.FC<ScreenProps> = ({ navigation }) => {
+const OTPScreen: React.FC<ScreenProps> = ({ navigation, route }) => {
+  const { userId, email } = route.params;
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +46,7 @@ const OTPScreen: React.FC<ScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const otpString = otp.join('');
     
     if (otpString.length !== 6) {
@@ -62,13 +61,89 @@ const OTPScreen: React.FC<ScreenProps> = ({ navigation }) => {
     
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const result = await apiService.verifyOTP({
+        userId,
+        otp: otpString
+      });
+      
+      if (result.success) {
+        // Store the token and user data
+        if (result.data?.token) {
+          await AsyncStorage.setItem('@auth_token', result.data.token);
+        }
+        if (result.data?.user) {
+          console.log('OTPScreen: user object after OTP:', result.data.user);
+          await AsyncStorage.setItem('@user_data', JSON.stringify(result.data.user));
+        }
+        
+        // Check if user has completed their profile (has usertag)
+        const hasCompletedProfile = result.data?.user?.usertag;
+        
+        if (!hasCompletedProfile) {
+          // OTP verified, now navigate to BVN verification
+          Alert.alert(
+            'Email Verified!',
+            'Your email has been verified. Please continue to BVN verification.',
+            [
+              {
+                text: 'Continue',
+                onPress: () => navigation.navigate('BVNVerification')
+              }
+            ]
+          );
+        } else {
+          // Profile already complete, create virtual account
+          console.log('📱 Profile complete, creating virtual account...');
+          try {
+            const accountResult = await apiService.createVirtualAccount();
+            if (accountResult.success) {
+              Alert.alert(
+                'Account Created Successfully!',
+                `Your virtual account has been created.\nAccount Number: ${accountResult.data?.accountNumber}\nBank: ${accountResult.data?.bankName}`,
+                [
+                  {
+                    text: 'Continue',
+                    onPress: () => navigation.navigate('BVNVerification')
+                  }
+                ]
+              );
+            } else {
+              console.error('Virtual account creation failed:', accountResult.error);
+              Alert.alert(
+                'Verification Successful',
+                'Your account has been verified, but there was an issue creating your virtual account. Please try again later.',
+                [
+                  {
+                    text: 'Continue',
+                    onPress: () => navigation.navigate('BVNVerification')
+                  }
+                ]
+              );
+            }
+          } catch (accountError) {
+            console.error('Virtual account creation error:', accountError);
+            Alert.alert(
+              'Verification Successful',
+              'Your account has been verified, but there was an issue creating your virtual account. You can try again later.',
+              [
+                {
+                  text: 'Continue',
+                  onPress: () => navigation.navigate('BVNVerification')
+                }
+              ]
+            );
+          }
+        }
+      } else {
+        setError(result.error || 'Invalid OTP. Please try again.');
+      }
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      setError('Unable to verify OTP. Please check your internet connection.');
+    } finally {
       setIsLoading(false);
-      // Add actual verification logic here
-      // For now, just navigate to the next screen
-      navigation.navigate('BVNVerification');
-    }, 1500);
+    }
   };
 
   return (
@@ -80,7 +155,7 @@ const OTPScreen: React.FC<ScreenProps> = ({ navigation }) => {
       >
         <View style={{ flex: 1 }}>
           <Text style={[styles.heading, { fontSize: 44, marginTop: 30, paddingHorizontal: 5, fontFamily: fontConfig.heading }]}>Verify your email</Text>
-          <Text style={[styles.subheading, { marginTop: 20, paddingHorizontal: 5 }]}>Enter the 6‑digit code we sent to your inbox</Text>
+          <Text style={[styles.subheading, { marginTop: 20, paddingHorizontal: 5 }]}>Enter the 6‑digit code we sent to {email}</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-start', marginTop: 20 }}>
             {otp.map((digit, idx) => (
               <TextInput

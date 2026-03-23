@@ -5,7 +5,7 @@
 
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import Constants from 'expo-constants';
 
 // Configure how notifications are handled when app is in foreground
@@ -318,7 +318,6 @@ export class PushNotificationService {
    * Open notification settings
    */
   async openSettings() {
-    const { Linking } = await import('react-native');
     if (Platform.OS === 'ios') {
       await Linking.openURL('app-settings:');
     } else {

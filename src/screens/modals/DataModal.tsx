@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Platform, Animated, Dimensions, TouchableWithoutFeedback, Keyboard, Alert, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Platform, Animated, Dimensions, TouchableWithoutFeedback, Keyboard, Alert, ScrollView, TextInput, Image } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import colors from '../../theme/colors';
 import { fontConfig } from '../../theme/fonts';
@@ -25,6 +25,13 @@ const NETWORKS = [
   { name: 'Glo', color: '#009A44' },
   { name: '9mobile', color: '#6CC417' },
 ];
+
+const NETWORK_LOGOS: Record<string, any> = {
+  MTN: require('../../assets/network/mtn.png'),
+  Airtel: require('../../assets/network/airtel.png'),
+  Glo: require('../../assets/network/glo.png'),
+  '9mobile': require('../../assets/network/9mobile.png'),
+};
 
 interface DataModalProps {
   visible: boolean;
@@ -261,8 +268,11 @@ const DataModal: React.FC<DataModalProps> = ({ visible, onClose }) => {
                       },
                     ]}
                     onPress={() => setSelectedNetwork(net.name)}
+                    accessibilityLabel={net.name}
                   >
-                    <Text style={{ color: net.color, fontWeight: '700' }}>{net.name}</Text>
+                    {NETWORK_LOGOS[net.name] ? (
+                      <Image source={NETWORK_LOGOS[net.name]} style={styles.networkLogo} resizeMode="contain" />
+                    ) : null}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -439,13 +449,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     alignItems: 'flex-start',
   },
-  continueBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 8,
-  },
   networkRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -453,13 +456,24 @@ const styles = StyleSheet.create({
   },
   networkBox: {
     flex: 1,
-    borderRadius: 10,
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginHorizontal: 4,
+    padding: 12,
+    borderRadius: 9999,
+    backgroundColor: '#F7F8FA',
+    alignItems: 'center',
+    borderColor: '#eee',
     borderWidth: 1,
-    borderColor: colors.gray,
+  },
+  networkLogo: {
+    width: 72,
+    height: 48,
+  },
+  continueBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: 9999,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 8,
   },
   bundleCard: {
     backgroundColor: '#F7F8FA',

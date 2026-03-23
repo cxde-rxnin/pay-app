@@ -6,6 +6,7 @@ import { useAppFonts } from './src/theme/fonts';
 import { ActivityIndicator, View } from 'react-native';
 import { NotificationProvider } from './src/contexts/NotificationContext';
 import { NotificationPreferencesProvider } from './src/contexts/NotificationPreferencesContext';
+import { AuthProvider } from './src/contexts/AuthContext';
 import { useNotificationPreferencesSync } from './src/hooks/useNotificationPreferencesSync';
 import NotificationContainer from './src/components/NotificationContainer';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
@@ -70,11 +71,13 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NotificationPreferencesProvider>
-        <NotificationProvider>
-          <AppContent />
-        </NotificationProvider>
-      </NotificationPreferencesProvider>
+      <AuthProvider>
+        <NotificationPreferencesProvider>
+          <NotificationProvider>
+            <AppContent />
+          </NotificationProvider>
+        </NotificationPreferencesProvider>
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }
